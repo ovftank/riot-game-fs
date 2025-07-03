@@ -1,4 +1,4 @@
-import type { RiotLoginResponse } from '@/src/types/riot';
+import type { RiotLoginResponse, RiotLoginResult, RiotOtpResult } from '@/src/types/riot';
 import puppeteer from 'puppeteer-ghost';
 import type { GhostBrowser, GhostPage } from 'puppeteer-ghost';
 
@@ -20,7 +20,7 @@ export class RiotBot {
         await this.browser.close();
     }
 
-    async login(username: string, password: string): Promise<boolean> {
+    async login(username: string, password: string): Promise<RiotLoginResult> {
         if (!this.page) throw new Error('chưa gọi method init');
 
         try {
@@ -50,16 +50,79 @@ export class RiotBot {
 
             const loginResponse = await loginResponsePromise;
             const responseData = (await loginResponse.json()) as RiotLoginResponse;
-            console.log(responseData);
-            const isSuccess = !responseData.error;
+            const isSuccess = responseData.type === 'success' || !!responseData.success;
 
             if (!isSuccess) {
-                console.log('đăng nhapaj fail :<');
+                return {
+                    success: false,
+                    data: responseData,
+                    error: responseData.error ?? 'đăng nhập thất bại'
+                };
+            } else {
+                return {
+                    success: true,
+                    data: responseData,
+                    puuid: responseData.success?.puuid
+                };
             }
-            return isSuccess;
         } catch (err) {
             console.error('toang cmnr:', err);
-            return false;
+            return {
+                success: false,
+                error: err instanceof Error ? err.message : 'lỗi không xác định'
+            };
+        }
+    }
+
+    async enterOtp(otp: string): Promise<RiotOtpResult> {
+        if (!this.page) throw new Error('chưa gọi method init');
+
+        try {
+            await this.page.waitForSelector('input[inputmode="numeric"]', { visible: true, timeout: 30000 });
+
+            const otpInputs = await this.page.$$('input[inputmode="numeric"]');
+
+            if (!otpInputs.length) {
+                return { success: false, error: 'k tìm thấy ô input OTP' };
+            }
+
+            for (let i = 0; i < Math.min(otp.length, otpInputs.length); i++) {
+                await otpInputs[i].type(otp[i]);
+            }
+
+            await this.page.waitForSelector('[data-testid="btn-mfa-submit"]', { visible: true, timeout: 10000 });
+            await this.page.click('[data-testid="btn-mfa-submit"]');
+
+            const otpResponsePromise = this.page.waitForResponse((response) => response.url().includes('/api/v1/login') && response.request().method() === 'PUT', { timeout: 30000 });
+
+            const otpResponse = await otpResponsePromise;
+            const responseData = (await otpResponse.json()) as RiotLoginResponse;
+
+            if (responseData.error === 'invalid_code') {
+                return {
+                    success: false,
+                    error: 'mã OTP không đúng',
+                    data: responseData
+                };
+            }
+
+            if (responseData.type === 'success' || !!responseData.success) {
+                return {
+                    success: true,
+                    data: responseData
+                };
+            }
+            return {
+                success: false,
+                error: responseData.error ?? 'lỗi xác thực OTP không xác định',
+                data: responseData
+            };
+        } catch (err) {
+            console.error('lỗi nhập OTP:', err);
+            return {
+                success: false,
+                error: err instanceof Error ? err.message : 'lỗi không xác định'
+            };
         }
     }
 }
