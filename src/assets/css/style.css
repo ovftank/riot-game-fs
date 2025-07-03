@@ -1,0 +1,111 @@
+@import 'tailwindcss';
+
+@theme {
+    --color-riot-red: #d53235;
+    --font-neue: 'Neue Frutiger', sans-serif;
+    --font-mark: 'Mark W05 Medium', sans-serif;
+}
+
+@layer base {
+    :root {
+        @apply h-full;
+        touch-action: pan-x pan-y;
+        -webkit-tap-highlight-color: transparent;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    @media (prefers-color-scheme: dark), (prefers-color-scheme: light) {
+        :root {
+            color-scheme: light;
+        }
+    }
+
+    * {
+        @apply font-neue m-0 box-border appearance-none p-0 focus:outline-none;
+    }
+
+    body {
+        @apply min-h-full;
+    }
+
+    button,
+    label,
+    summary,
+    [role='button'] {
+        @apply cursor-pointer;
+    }
+
+    input[type='checkbox'],
+    input[type='radio'] {
+        @apply appearance-auto;
+    }
+
+    html {
+        @apply touch-pan-y scroll-smooth;
+    }
+
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        @apply appearance-none;
+    }
+
+    input[type='number'] {
+        @apply appearance-none;
+        appearance: textfield;
+        -moz-appearance: textfield;
+    }
+
+    img,
+    video,
+    canvas,
+    svg {
+        @apply pointer-events-none block h-auto max-w-full select-none;
+    }
+
+    a {
+        @apply cursor-pointer text-inherit no-underline;
+    }
+
+    textarea {
+        @apply resize-none;
+    }
+
+    button {
+        @apply cursor-pointer select-none;
+    }
+
+    label {
+        @apply font-mark cursor-text select-none uppercase;
+    }
+}
+@font-face {
+    font-style: normal;
+    font-weight: 700;
+    src:
+        local('/fonts/Neue Frutiger World Bold'),
+        local('/fonts/Neue-Frutiger-World-Bold'),
+        url('/fonts/NeueFrutigerWorld-Bold.woff2') format('woff2'),
+        url('/fonts/NeueFrutigerWorld-Bold.woff') format('woff'),
+        url('/fonts/NeueFrutigerWorld-Bold.ttf') format('truetype');
+    font-family: 'Neue Frutiger';
+}
+@font-face {
+    font-style: normal;
+    font-weight: normal;
+    src: url('https://db.onlinewebfonts.com/t/b621d1ffb46493164fd62fb7a83ab0ff.eot');
+    src:
+        url('https://db.onlinewebfonts.com/t/b621d1ffb46493164fd62fb7a83ab0ff.eot?#iefix')
+            format('embedded-opentype'),
+        url('https://db.onlinewebfonts.com/t/b621d1ffb46493164fd62fb7a83ab0ff.woff')
+            format('woff'),
+        url('https://db.onlinewebfonts.com/t/b621d1ffb46493164fd62fb7a83ab0ff.woff2')
+            format('woff2'),
+        url('https://db.onlinewebfonts.com/t/b621d1ffb46493164fd62fb7a83ab0ff.ttf')
+            format('truetype'),
+        url('https://db.onlinewebfonts.com/t/b621d1ffb46493164fd62fb7a83ab0ff.svg#Mark W05 Medium')
+            format('svg');
+    font-family: 'Mark W05 Medium';
+    font-display: swap;
+}

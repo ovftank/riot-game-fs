@@ -1,57 +1,29 @@
 {
     "compilerOptions": {
+        "target": "ES2020",
+        "useDefineForClassFields": true,
         "module": "ESNext",
-        "moduleResolution": "node",
-        "target": "ES2022",
-        "lib": [
-            "ES2022",
-            "DOM",
-            "DOM.Iterable"
-        ],
-        "outDir": "./dist",
-        "rootDir": ".",
-        "declaration": true,
-        "declarationMap": true,
-        "sourceMap": true,
-        "removeComments": true,
-        "forceConsistentCasingInFileNames": true,
-        "verbatimModuleSyntax": true,
-        "strict": true,
-        "noImplicitAny": true,
-        "strictNullChecks": true,
-        "strictFunctionTypes": true,
-        "strictBindCallApply": true,
-        "strictPropertyInitialization": true,
-        "noImplicitThis": false,
-        "noImplicitReturns": false,
-        "noFallthroughCasesInSwitch": false,
-        "noUncheckedIndexedAccess": false,
-        "exactOptionalPropertyTypes": false,
-        "noUnusedLocals": false,
-        "noUnusedParameters": false,
-        "noPropertyAccessFromIndexSignature": false,
-        "allowUnusedLabels": true,
-        "allowUnreachableCode": true,
-        "skipLibCheck": false,
-        "resolveJsonModule": true,
+        "lib": ["ES2020", "DOM", "DOM.Iterable"],
+        "skipLibCheck": true,
+        "moduleResolution": "bundler",
+        "allowImportingTsExtensions": true,
         "isolatedModules": true,
-        "allowImportingTsExtensions": false,
-        "allowSyntheticDefaultImports": true,
-        "esModuleInterop": true,
-        "noResolve": false,
+        "moduleDetection": "force",
+        "noEmit": true,
+        "strict": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "noFallthroughCasesInSwitch": true,
         "baseUrl": ".",
         "paths": {
-            "@/*": [
-                "./*"
-            ],
+            "@/*": ["src/*"]
         }
     },
-    "include": [
-        "*.ts",
-        "**/*.ts"
-    ],
-    "exclude": [
-        "node_modules",
-        "dist",
+    "include": ["src/**/*.ts"],
+    "exclude": ["node_modules", "vite.config.ts"],
+    "references": [
+        {
+            "path": "./tsconfig.node.json"
+        }
     ]
 }

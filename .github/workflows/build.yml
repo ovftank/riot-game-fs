@@ -1,0 +1,87 @@
+name: Build and Deploy
+
+on:
+    push:
+        branches:
+            - frontend
+    workflow_dispatch:
+
+jobs:
+    build-and-deploy:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+
+        steps:
+            - name: Checkout frontend branch
+              uses: actions/checkout@v4
+              with:
+                  ref: frontend
+
+            - name: Install pnpm
+              uses: pnpm/action-setup@v4
+              with:
+                  version: 10
+                  run_install: false
+
+            - name: Set up Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: '22'
+
+            - name: Install dependencies
+              run: pnpm install --no-frozen-lockfile
+
+            - name: Build the application
+              run: pnpm run build
+
+            - name: Verify essential files exist
+              run: |
+                  if [ ! -d "dist" ]; then
+                    echo "dist folder not found!"
+                    exit 1
+                  fi
+
+            - name: Backup dist folder to parent directory
+              run: mkdir -p ../backup && cp -r dist/. ../backup/
+
+            - name: Check if main branch exists
+              id: check_branch
+              run: |
+                  if git ls-remote --heads origin main | grep main; then
+                    echo "branch_exists=true" >> $GITHUB_OUTPUT
+                  else
+                    echo "branch_exists=false" >> $GITHUB_OUTPUT
+                  fi
+
+            - name: Create main branch if not exists
+              if: steps.check_branch.outputs.branch_exists == 'false'
+              run: |
+                  git checkout -b main
+                  git push -u origin main
+                  git checkout frontend
+
+            - name: Checkout main branch
+              uses: actions/checkout@v4
+              with:
+                  ref: main
+
+            - name: Clean dist folder in main branch
+              run: |
+                  rm -rf src/dist
+
+            - name: Restore dist contents from backup
+              run: |
+                  mkdir -p src
+                  cp -ra ../backup/. src/dist/
+
+            - name: Configure Git
+              run: |
+                  git config --global user.name "github-actions[bot]"
+                  git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+            - name: Commit and push changes
+              run: |
+                  git add .
+                  git commit -m "build: update dist files [skip ci]" || echo "no changes to commit"
+                  git push origin main
