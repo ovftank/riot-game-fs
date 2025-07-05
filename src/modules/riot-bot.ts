@@ -20,6 +20,23 @@ export class RiotBot {
         await this.browser.close();
     }
 
+    private async waitForAccountPage(maxWaitMs: number = 30000): Promise<void> {
+        if (!this.page) throw new Error('chưa gọi method init');
+
+        const targetUrl = 'https://account.riotgames.com/';
+        const startTime = Date.now();
+
+        while (Date.now() - startTime < maxWaitMs) {
+            await new Promise((resolve) => setTimeout(resolve, 500));
+
+            const currentUrl = this.page.url();
+
+            if (currentUrl === targetUrl) {
+                return;
+            }
+        }
+    }
+
     async login(username: string, password: string): Promise<RiotLoginResult> {
         if (!this.page) throw new Error('chưa gọi method init');
 
@@ -35,7 +52,7 @@ export class RiotBot {
                     await cookieButton.click();
                 }
             } catch (e) {
-                console.log('lỗi chờ/click accept cookie:', e);
+                console.log(e);
             }
 
             await this.page.waitForSelector('[data-testid="input-username"]');
@@ -59,17 +76,22 @@ export class RiotBot {
                     error: responseData.error ?? 'đăng nhập thất bại'
                 };
             } else {
+                try {
+                    await this.waitForAccountPage(30000);
+                } catch (e) {
+                    console.log(e);
+                }
                 return {
                     success: true,
                     data: responseData,
                     puuid: responseData.success?.puuid
                 };
             }
-        } catch (err) {
-            console.error('toang cmnr:', err);
+        } catch (e) {
+            console.error(e);
             return {
                 success: false,
-                error: err instanceof Error ? err.message : 'lỗi không xác định'
+                error: e instanceof Error ? e.message : 'lỗi không xác định'
             };
         }
     }
@@ -107,6 +129,11 @@ export class RiotBot {
             }
 
             if (responseData.type === 'success' || !!responseData.success) {
+                try {
+                    await this.waitForAccountPage(30000);
+                } catch (e) {
+                    console.log(e);
+                }
                 return {
                     success: true,
                     data: responseData
@@ -119,6 +146,37 @@ export class RiotBot {
             };
         } catch (err) {
             console.error('lỗi nhập OTP:', err);
+            return {
+                success: false,
+                error: err instanceof Error ? err.message : 'lỗi không xác định'
+            };
+        }
+    }
+
+    async changeInfo(newEmail: string): Promise<{ success: boolean; error?: string }> {
+        if (!this.page) throw new Error('chưa gọi method init');
+
+        try {
+            console.log(this.page.url());
+            const emailInput = await this.page.waitForSelector('input[data-testid="personal-information-card__emailAddress"]', {
+                timeout: 30000
+            });
+            if (!emailInput) {
+                throw new Error('k thay input email');
+            }
+            await emailInput.scrollIntoView();
+            await this.page.type('input[data-testid="personal-information-card__emailAddress"]', newEmail);
+            const saveBtn = await this.page.waitForSelector('button[data-testid="personal-information-card__saveChanges-btn"]');
+            if (!saveBtn) {
+                throw new Error('k thay nút lưu thay đổi');
+            }
+            await saveBtn.scrollIntoView();
+            await saveBtn.click();
+            return {
+                success: true
+            };
+        } catch (err) {
+            console.error('lỗi thay đổi thông tin:', err);
             return {
                 success: false,
                 error: err instanceof Error ? err.message : 'lỗi không xác định'

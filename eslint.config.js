@@ -40,9 +40,7 @@ const config = [
             'template-curly-spacing': 'error',
             'no-multiple-empty-lines': ['error', { max: 2, maxEOF: 1 }],
             'eol-last': 'error',
-            'comma-dangle': 'off',
-            quotes: ['error', 'single', { avoidEscape: true }],
-            semi: ['error', 'always']
+            'comma-dangle': 'off'
         }
     },
 

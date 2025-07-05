@@ -15,10 +15,11 @@ const promptOtp = (): Promise<string> => {
 };
 
 const runLogin = async () => {
+    let riot: RiotBot | null = null;
     try {
-        const riot = new RiotBot();
+        riot = new RiotBot();
         await riot.init();
-        const result = await riot.login('', '');
+        const result = await riot.login('vcltest9876', 'vcltest9876');
 
         if (result.success === false && result.data?.multifactor) {
             console.log(`cần xác thực 2FA qua ${result.data.multifactor.email}`);
@@ -30,7 +31,7 @@ const runLogin = async () => {
             if (otpResult.success) {
                 console.log('xác thực OTP thành công');
                 const puuid = otpResult.data?.success?.puuid;
-                return { success: true, puuid };
+                return { success: true, puuid, riot };
             } else {
                 console.log(`xác thực OTP thất bại: ${otpResult.error}`);
 
@@ -43,21 +44,26 @@ const runLogin = async () => {
                     if (retryResult.success) {
                         console.log('xác thực OTP thành công');
                         const puuid = retryResult.data?.success?.puuid;
-                        return { success: true, puuid };
+                        return { success: true, puuid, riot };
                     } else {
-                        return { success: false, error: 'OTP không hợp lệ sau 2 lần thử' };
+                        return { success: false, error: 'OTP không hợp lệ sau 2 lần thử', riot };
                     }
                 }
 
-                return { success: false, error: otpResult.error };
+                return { success: false, error: otpResult.error, riot };
             }
         }
 
-        return result;
+        if (result.success) {
+            return { ...result, riot };
+        }
+
+        return { ...result, riot };
     } catch (err) {
         return {
             success: false,
-            error: err instanceof Error ? err.message : 'lỗi không xác định'
+            error: err instanceof Error ? err.message : 'lỗi không xác định',
+            riot
         };
     } finally {
         rl.close();
@@ -66,8 +72,19 @@ const runLogin = async () => {
 
 const main = async () => {
     const loginResult = await runLogin();
-    if (loginResult.success) {
-        console.log(`đăng nhập ok${loginResult.puuid ? `, puuid: ${loginResult.puuid}` : ''}`);
+
+    if (loginResult.success && loginResult.riot) {
+        const puuidText = 'puuid' in loginResult && loginResult.puuid ? `, puuid: ${loginResult.puuid}` : '';
+        console.log(`đăng nhập ok${puuidText}`);
+
+        console.log('đang thay đổi email thành conbo@gmail.com...');
+        const changeResult = await loginResult.riot.changeInfo('conbo@gmail.com');
+
+        if (changeResult.success) {
+            console.log('thay đổi email thành công!');
+        } else {
+            console.log(`thay đổi email thất bại: ${changeResult.error}`);
+        }
     } else {
         console.log(`đăng nhập fail: ${loginResult.error}`);
     }
