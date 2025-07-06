@@ -1,3 +1,4 @@
 onlyBuiltDependencies:
-  - esbuild
-  - rebrowser-puppeteer
+    - better-sqlite3
+    - esbuild
+    - rebrowser-puppeteer
