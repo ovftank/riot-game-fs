@@ -64,7 +64,9 @@ class SocketService {
         if (this.isConnecting || this.isConnected()) return;
 
         this.isConnecting = true;
-        this.socket = io('http://localhost:3000', {
+        const socketUrl =
+            import.meta.env.VITE_SOCKET_URL || window.location.origin;
+        this.socket = io(socketUrl, {
             transports: ['websocket', 'polling'],
             timeout: 20000,
             reconnection: true,

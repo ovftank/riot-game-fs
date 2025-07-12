@@ -7,7 +7,7 @@ import { html } from '@/lib/html';
 import faIcon from '@/lib/icons';
 import errIcon from '@/assets/image/icons/error-icon';
 import closeIcon from '@/assets/image/icons/close-icon';
-import { setupEnterCodeEvents, email } from '@/services/ui/enter-code';
+import { setupEnterCodeEvents, getEmail } from '@/services/ui/enter-code';
 
 const setupEnterCode = (): void => {
     setupEnterCodeEvents();
@@ -43,7 +43,7 @@ const EnterCode = (): string => {
                             Verification Required
                         </p>
                         <p class="mt-4 text-xl font-medium text-[#737373]">
-                            Enter the code we’ve emailed to ${email}
+                            Enter the code we’ve emailed to ${getEmail()}
                         </p>
                         <div class="mt-8 flex justify-center gap-3">
                             <input

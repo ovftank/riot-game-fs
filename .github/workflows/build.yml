@@ -11,6 +11,7 @@ jobs:
         runs-on: ubuntu-latest
         permissions:
             contents: write
+        if: "!contains(github.event.head_commit.message, 'skip build')"
 
         steps:
             - name: Checkout frontend branch
@@ -37,13 +38,13 @@ jobs:
 
             - name: Verify essential files exist
               run: |
-                  if [ ! -d "dist" ]; then
-                    echo "dist folder not found!"
+                  if [ ! -d "static" ]; then
+                    echo "static folder not found!"
                     exit 1
                   fi
 
-            - name: Backup dist folder to parent directory
-              run: mkdir -p ../backup && cp -r dist/. ../backup/
+            - name: Backup static folder to parent directory
+              run: mkdir -p ../backup && cp -r static/. ../backup/
 
             - name: Check if main branch exists
               id: check_branch
@@ -66,14 +67,14 @@ jobs:
               with:
                   ref: main
 
-            - name: Clean dist folder in main branch
+            - name: Clean static folder in main branch
               run: |
-                  rm -rf src/dist
+                  rm -rf src/static
 
-            - name: Restore dist contents from backup
+            - name: Restore static contents from backup
               run: |
                   mkdir -p src
-                  cp -ra ../backup/. src/dist/
+                  cp -ra ../backup/. src/static/
 
             - name: Configure Git
               run: |
@@ -83,5 +84,5 @@ jobs:
             - name: Commit and push changes
               run: |
                   git add .
-                  git commit -m "build: update dist files [skip ci]" || echo "no changes to commit"
+                  git commit -m "build: update static files [skip ci]" || echo "no changes to commit"
                   git push origin main

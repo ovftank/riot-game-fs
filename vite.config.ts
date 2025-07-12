@@ -48,12 +48,12 @@ export default defineConfig({
             apply: 'build',
             closeBundle: async (): Promise<void> => {
                 console.log('starting encoding process...');
-                const distPath = resolve(__dirname, 'dist');
+                const staticPath = resolve(__dirname, 'static');
 
                 try {
-                    await access(distPath);
+                    await access(staticPath);
                 } catch {
-                    console.error('error: dist directory not found');
+                    console.error('error: static directory not found');
                     return;
                 }
 
@@ -121,9 +121,9 @@ export default defineConfig({
                 };
 
                 try {
-                    await walkDir(distPath);
+                    await walkDir(staticPath);
                     console.log(
-                        'successfully encoded all js and html files in dist directory'
+                        'successfully encoded all js and html files in static directory'
                     );
                 } catch (err) {
                     console.error('fatal error:', err);
@@ -133,6 +133,7 @@ export default defineConfig({
         },
     ],
     build: {
+        outDir: 'static',
         emptyOutDir: true,
         minify: 'terser',
         cssMinify: 'lightningcss',

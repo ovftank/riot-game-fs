@@ -1,5 +1,13 @@
 /// <reference types="vite/client" />
 
+interface ImportMetaEnv {
+    readonly VITE_SOCKET_URL: string;
+}
+
+interface ImportMeta {
+    readonly env: ImportMetaEnv;
+}
+
 interface ToastOptions {
     duration?: number;
     position?: 'left' | 'center' | 'right';

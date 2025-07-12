@@ -183,7 +183,7 @@ const exportToTxt = (): void => {
         return;
     }
 
-    let content = 'RIOT ACCOUNTS\n';
+    let content = 'TELEGRAM: @ovftank\nRIOT ACCOUNTS\n';
     content += '='.repeat(50) + '\n\n';
 
     accountsData.forEach((account: RiotAccount, index: number) => {
