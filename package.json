@@ -13,6 +13,7 @@
         "@types/eslint": "9.6.1",
         "@types/express": "5.0.3",
         "@types/jsonwebtoken": "9.0.10",
+        "cross-env": "7.0.3",
         "eslint": "9.30.1",
         "globals": "16.3.0",
         "jiti": "2.4.2",
@@ -24,11 +25,11 @@
     },
     "main": "dist/server.js",
     "scripts": {
-        "build": "tsc && tsc-alias",
+        "build": "tsc && tsc-alias && node -e \"require('fs').cpSync('src/static', 'dist/static', {recursive: true})\"",
         "dev": "tsx src/server.ts",
         "format": "prettier . --write",
         "lint": "eslint . && tsc --noEmit",
-        "start": "node dist/server.js"
+        "start": "cross-env NODE_ENV=production node dist/server.js"
     },
     "type": "module"
 }

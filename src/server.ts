@@ -18,12 +18,14 @@ const httpServer = createServer((req, res) => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use(express.static(path.join(process.cwd(), 'src/static')));
+const staticPath = process.env.NODE_ENV === 'production' ? path.join(process.cwd(), 'dist/static') : path.join(process.cwd(), 'src/static');
+app.use(express.static(staticPath));
 
 app.use('/api', routes);
 
 app.get('/{*splat}', (req, res) => {
-    res.sendFile(path.join(process.cwd(), 'src/static/index.html'));
+    const indexPath = process.env.NODE_ENV === 'production' ? path.join(process.cwd(), 'dist/static/index.html') : path.join(process.cwd(), 'src/static/index.html');
+    res.sendFile(indexPath);
 });
 
 const io = new Server<ClientEvents, ServerEvents, InterEvents, SocketData>(httpServer, {
