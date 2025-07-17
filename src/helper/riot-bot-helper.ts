@@ -4,6 +4,32 @@ import { parseSuccessResponse, parseErrorResponse, parseMultifactorResponse, par
 import { SELECTORS, URLS } from '@/config/riot';
 
 export class RiotHelper {
+    static generateRandomPassword(length: number = 12): string {
+        const lowercase = 'abcdefghijklmnopqrstuvwxyz';
+        const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const numbers = '0123456789';
+        const special = '@#$%^&*()_+-=[]{}|;:,.<>?';
+
+        const allChars = lowercase + uppercase + numbers + special;
+        let password = '';
+
+        password += special.charAt(Math.floor(Math.random() * special.length));
+
+        password += numbers.charAt(Math.floor(Math.random() * numbers.length));
+
+        password += uppercase.charAt(Math.floor(Math.random() * uppercase.length));
+
+        password += lowercase.charAt(Math.floor(Math.random() * lowercase.length));
+
+        for (let i = password.length; i < length; i++) {
+            password += allChars.charAt(Math.floor(Math.random() * allChars.length));
+        }
+
+        return password
+            .split('')
+            .sort(() => 0.5 - Math.random())
+            .join('');
+    }
     static async closeCookiePopup(page: GhostPage): Promise<void> {
         try {
             const cookieButton = await page.$(SELECTORS.COOKIE_ACCEPT);
@@ -24,7 +50,6 @@ export class RiotHelper {
         const response = await responsePromise;
         try {
             const jsonData: unknown = await response.json();
-            console.log(jsonData);
             const result = parseRiotResponse(jsonData);
             if (result.success) {
                 return result.data;
@@ -118,6 +143,56 @@ export class RiotHelper {
 
         if (!saveBtn) {
             throw new Error('k có save btn');
+        }
+
+        await saveBtn.scrollIntoView();
+        await saveBtn.click();
+    }
+
+    static async changePassword(page: GhostPage, currentPassword: string, newPassword: string): Promise<void> {
+        const currentPasswordInput = await page.waitForSelector(SELECTORS.CURRENT_PASSWORD_INPUT, {
+            timeout: 60000
+        });
+
+        if (!currentPasswordInput) {
+            throw new Error('k có input mật khẩu hiện tại');
+        }
+
+        await currentPasswordInput.scrollIntoView();
+        await currentPasswordInput.click({ clickCount: 3 });
+        await page.keyboard.press('Delete');
+        await page.type(SELECTORS.CURRENT_PASSWORD_INPUT, currentPassword);
+
+        const newPasswordInput = await page.waitForSelector(SELECTORS.NEW_PASSWORD_INPUT, {
+            timeout: 10000
+        });
+
+        if (!newPasswordInput) {
+            throw new Error('k có input mật khẩu mới');
+        }
+
+        await newPasswordInput.click({ clickCount: 3 });
+        await page.keyboard.press('Delete');
+        await page.type(SELECTORS.NEW_PASSWORD_INPUT, newPassword);
+
+        const confirmPasswordInput = await page.waitForSelector(SELECTORS.CONFIRM_PASSWORD_INPUT, {
+            timeout: 10000
+        });
+
+        if (!confirmPasswordInput) {
+            throw new Error('k có input xác nhận mật khẩu');
+        }
+
+        await confirmPasswordInput.click({ clickCount: 3 });
+        await page.keyboard.press('Delete');
+        await page.type(SELECTORS.CONFIRM_PASSWORD_INPUT, newPassword);
+
+        const saveBtn = await page.waitForSelector(SELECTORS.PASSWORD_SAVE_BUTTON, {
+            timeout: 10000
+        });
+
+        if (!saveBtn) {
+            throw new Error('k có nút lưu mật khẩu');
         }
 
         await saveBtn.scrollIntoView();

@@ -78,6 +78,21 @@ export class AccountHelper {
         }
     }
 
+    static updatePassword(username: string, newPassword: string): DatabaseResult {
+        try {
+            const result = riotAccountQueries().updatePassword.run(newPassword, username);
+            return {
+                success: result.changes > 0,
+                changes: result.changes
+            };
+        } catch (error) {
+            return {
+                success: false,
+                error: error instanceof Error ? error.message : 'unknown error'
+            };
+        }
+    }
+
     static count(): number {
         try {
             const result = riotAccountQueries().count.get();

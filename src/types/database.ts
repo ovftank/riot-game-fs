@@ -10,6 +10,7 @@ export interface RiotAccountQueries {
     findByUsername: Statement;
     findAll: Statement;
     delete: Statement;
+    updatePassword: Statement;
     count: Statement;
 }
 

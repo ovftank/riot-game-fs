@@ -11,6 +11,11 @@ export const SELECTORS = {
     EMAIL_INPUT: 'input[data-testid="personal-information-card__emailAddress"]',
     SAVE_BUTTON: 'button[data-testid="personal-information-card__saveChanges-btn"]',
 
+    CURRENT_PASSWORD_INPUT: 'input[data-testid="password-card__currentPassword"]',
+    NEW_PASSWORD_INPUT: 'input[data-testid="password-card__newPassword"]',
+    CONFIRM_PASSWORD_INPUT: 'input[data-testid="password-card__confirmNewPassword"]',
+    PASSWORD_SAVE_BUTTON: 'button[data-testid="password-card__submit-btn"]',
+
     SOCIAL_REMOVE_BUTTON: 'button[data-testid="login-button-remove"]',
     DISCONNECT_CONFIRM_BUTTON: 'button[data-testid="modal_close-btn"]'
 };

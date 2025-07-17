@@ -156,6 +156,10 @@ const initQueries = () => {
             DELETE FROM riot_accounts WHERE id = ?
         `),
 
+        updatePassword: db.prepare(`--sql
+            UPDATE riot_accounts SET password = ? WHERE username = ?
+        `),
+
         count: db
             .prepare(
                 `--sql

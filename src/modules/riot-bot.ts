@@ -1,9 +1,9 @@
-import type { Result } from '@/types/riot';
-import { RiotHelper, RiotError } from '@/helper/riot-bot-helper';
-import { ProxyHelper } from '@/helper/database-helper';
-import puppeteer from 'puppeteer-ghost';
-import type { GhostBrowser, GhostPage, GhostLaunchOptions } from 'puppeteer-ghost';
 import { URLS } from '@/config/riot';
+import { ProxyHelper } from '@/helper/database-helper';
+import { RiotError, RiotHelper } from '@/helper/riot-bot-helper';
+import type { Result } from '@/types/riot';
+import type { GhostBrowser, GhostLaunchOptions, GhostPage } from 'puppeteer-ghost';
+import puppeteer from 'puppeteer-ghost';
 
 export class RiotBot {
     private browser: GhostBrowser | null;
@@ -105,9 +105,25 @@ export class RiotBot {
 
         try {
             await RiotHelper.changeEmail(this.page, newEmail);
+
             return { success: true };
         } catch (err) {
             RiotError.logErr('change email', err);
+            return {
+                success: false,
+                error: RiotError.formatErr(err)
+            };
+        }
+    }
+
+    async changePassword(currentPassword: string, newPassword: string): Promise<{ success: boolean; error?: string }> {
+        if (!this.page) throw new Error('chưa gọi method init');
+
+        try {
+            await RiotHelper.changePassword(this.page, currentPassword, newPassword);
+            return { success: true };
+        } catch (err) {
+            RiotError.logErr('change password', err);
             return {
                 success: false,
                 error: RiotError.formatErr(err)
