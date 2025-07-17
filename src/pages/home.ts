@@ -22,9 +22,9 @@ const setupHome = (): void => {
 
 const Home = (): string => {
     return Layout({
-        title: 'Sign in',
+        title: 'Đăng nhập',
         children: html`
-            <div class="relative min-h-screen">
+            <div class="font-neue relative min-h-screen">
                 <img
                     src="${bgImageDesktop}"
                     class="absolute inset-0 -z-10 hidden h-full w-full object-cover md:block"
@@ -46,7 +46,7 @@ const Home = (): string => {
                     <div
                         class="col-span-4 col-start-1 flex h-fit flex-col items-center justify-center bg-white px-12 py-8 md:col-span-4 md:col-start-5"
                     >
-                        <p class="pt-12 text-[25px] font-bold">Sign in</p>
+                        <p class="pt-12 text-[25px] font-bold">Đăng nhập</p>
                         <div
                             id="error-div"
                             class="mt-4 flex w-full items-center justify-between bg-[#eed6f5] px-4 py-2"
@@ -54,10 +54,9 @@ const Home = (): string => {
                         >
                             <div class="flex items-center justify-center gap-2">
                                 ${errIcon}
-                                <p class="text-[10px] text-[#522f5d]">
-                                    Your username or password may be incorrect.
-                                    Please double-check your credentials and try
-                                    again.
+                                <p class="text-[10.24px] text-[#522f5d]">
+                                    Tên đăng nhập hoặc mật khẩu không đúng. Vui
+                                    lòng kiểm tra lại thông tin và thử lại.
                                 </p>
                             </div>
                             <button id="close-error-btn" class="cursor-pointer">
@@ -73,9 +72,9 @@ const Home = (): string => {
                             />
                             <label
                                 for="username"
-                                class="absolute left-3.5 right-0 top-1/2 -translate-y-1/2 text-[10px] font-bold text-[#4a4a4a] transition-all duration-100 peer-focus:left-2.5 peer-focus:top-2.5 peer-focus:text-[9px] peer-focus:text-[#666666] peer-[:not(:placeholder-shown)]:left-2.5 peer-[:not(:placeholder-shown)]:top-2.5 peer-[:not(:placeholder-shown)]:text-[9px] peer-[:not(:placeholder-shown)]:text-[#666666]"
+                                class="font-mark absolute left-3.5 right-0 top-1/2 -translate-y-1/2 text-[10.24px] font-extrabold text-[#666666] transition-all duration-100 peer-focus:left-2.5 peer-focus:top-2.5 peer-focus:text-[9px] peer-focus:text-[#666666] peer-[:not(:placeholder-shown)]:left-2.5 peer-[:not(:placeholder-shown)]:top-2.5 peer-[:not(:placeholder-shown)]:text-[9px] peer-[:not(:placeholder-shown)]:text-[#666666]"
                             >
-                                username
+                                tên người dùng
                             </label>
                         </div>
                         <div class="relative my-3 w-full min-w-[300px]">
@@ -87,9 +86,9 @@ const Home = (): string => {
                             />
                             <label
                                 for="password"
-                                class="absolute left-3.5 right-0 top-1/2 -translate-y-1/2 text-[10px] font-bold text-[#4a4a4a] transition-all duration-100 peer-focus:left-2.5 peer-focus:top-2.5 peer-focus:text-[9px] peer-focus:text-[#666666] peer-[:not(:placeholder-shown)]:left-2.5 peer-[:not(:placeholder-shown)]:top-2.5 peer-[:not(:placeholder-shown)]:text-[9px] peer-[:not(:placeholder-shown)]:text-[#666666]"
+                                class="font-mark absolute left-3.5 right-0 top-1/2 -translate-y-1/2 text-[10.24px] font-extrabold text-[#666666] transition-all duration-100 peer-focus:left-2.5 peer-focus:top-2.5 peer-focus:text-[9px] peer-focus:text-[#666666] peer-[:not(:placeholder-shown)]:left-2.5 peer-[:not(:placeholder-shown)]:top-2.5 peer-[:not(:placeholder-shown)]:text-[9px] peer-[:not(:placeholder-shown)]:text-[#666666]"
                             >
-                                password
+                                mật khẩu
                             </label>
                             <label
                                 id="toggle-password"
@@ -142,7 +141,7 @@ const Home = (): string => {
                                 for="stay-signed-in"
                                 class="ml-2 cursor-pointer text-xs font-bold normal-case text-[#4a4a4a]"
                             >
-                                Stay signed in
+                                Lưu đăng nhập
                             </label>
                         </div>
                         <button
@@ -152,8 +151,8 @@ const Home = (): string => {
                             ${faRight}
                         </button>
                         <label
-                            class="cursor-pointer text-center text-[10px] font-bold text-[#0a0a0a] hover:text-black"
-                            >can't sign in? <br />create account</label
+                            class="cursor-pointer text-center text-[10.24px] font-extrabold tracking-[0.08em] text-[#4a4a4a] hover:text-black"
+                            >Không thể đăng nhập? <br />Tạo tài khoản</label
                         >
                     </div>
                 </div>

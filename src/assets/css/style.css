@@ -2,8 +2,8 @@
 
 @theme {
     --color-riot-red: #d53235;
-    --font-neue: 'Neue Frutiger', sans-serif;
-    --font-mark: 'Mark W05 Medium', sans-serif;
+    --font-neue: 'Neue Frutiger World vi', sans-serif;
+    --font-mark: 'FF Mark W05', sans-serif;
 }
 
 @layer base {
@@ -77,35 +77,93 @@
     }
 
     label {
-        @apply font-mark cursor-text select-none uppercase;
+        @apply cursor-text select-none uppercase;
     }
 }
 @font-face {
     font-style: normal;
-    font-weight: 700;
+    font-weight: 500;
     src:
-        local('/fonts/Neue Frutiger World Bold'),
-        local('/fonts/Neue-Frutiger-World-Bold'),
-        url('/fonts/NeueFrutigerWorld-Bold.woff2') format('woff2'),
-        url('/fonts/NeueFrutigerWorld-Bold.woff') format('woff'),
-        url('/fonts/NeueFrutigerWorld-Bold.ttf') format('truetype');
-    font-family: 'Neue Frutiger';
+        url('/fonts/FFMarkW05-Medium.woff2') format('woff2'),
+        url('/fonts/FFMarkW05-Medium.woff') format('woff'),
+        url('/fonts/FFMarkW05-Medium.ttf') format('truetype');
+    font-family: 'FF Mark W05';
+    font-display: swap;
 }
+
 @font-face {
     font-style: normal;
-    font-weight: normal;
-    src: url('https://db.onlinewebfonts.com/t/b621d1ffb46493164fd62fb7a83ab0ff.eot');
+    font-weight: 700;
     src:
-        url('https://db.onlinewebfonts.com/t/b621d1ffb46493164fd62fb7a83ab0ff.eot?#iefix')
-            format('embedded-opentype'),
-        url('https://db.onlinewebfonts.com/t/b621d1ffb46493164fd62fb7a83ab0ff.woff')
-            format('woff'),
-        url('https://db.onlinewebfonts.com/t/b621d1ffb46493164fd62fb7a83ab0ff.woff2')
-            format('woff2'),
-        url('https://db.onlinewebfonts.com/t/b621d1ffb46493164fd62fb7a83ab0ff.ttf')
-            format('truetype'),
-        url('https://db.onlinewebfonts.com/t/b621d1ffb46493164fd62fb7a83ab0ff.svg#Mark W05 Medium')
-            format('svg');
-    font-family: 'Mark W05 Medium';
+        url('/fonts/FFMarkW05-Bold.woff2') format('woff2'),
+        url('/fonts/FFMarkW05-Bold.woff') format('woff'),
+        url('/fonts/FFMarkW05-Bold.ttf') format('truetype');
+    font-family: 'FF Mark W05';
+    font-display: swap;
+}
+
+@font-face {
+    font-style: normal;
+    font-weight: 800;
+    src:
+        url('/fonts/FFMarkW05-Heavy.woff2') format('woff2'),
+        url('/fonts/FFMarkW05-Heavy.woff') format('woff'),
+        url('/fonts/FFMarkW05-Heavy.ttf') format('truetype');
+    font-family: 'FF Mark W05';
+    font-display: swap;
+}
+
+@font-face {
+    font-style: normal;
+    font-weight: 900;
+    src:
+        url('/fonts/FFMarkW05-Ultra.woff2') format('woff2'),
+        url('/fonts/FFMarkW05-Ultra.woff') format('woff'),
+        url('/fonts/FFMarkW05-Ultra.ttf') format('truetype');
+    font-family: 'FF Mark W05';
+    font-display: swap;
+}
+
+@font-face {
+    font-style: normal;
+    font-weight: 500;
+    src:
+        url('/fonts/NeueFrutigerWorld-Medium.vi_VN.woff2') format('woff2'),
+        url('/fonts/NeueFrutigerWorld-Medium.vi_VN.woff') format('woff'),
+        url('/fonts/NeueFrutigerWorld-Medium.vi_VN.ttf') format('truetype');
+    font-family: 'Neue Frutiger World vi';
+    font-display: swap;
+}
+
+@font-face {
+    font-style: normal;
+    font-weight: 700;
+    src:
+        url('/fonts/NeueFrutigerWorld-Bold.vi_VN.woff2') format('woff2'),
+        url('/fonts/NeueFrutigerWorld-Bold.vi_VN.woff') format('woff'),
+        url('/fonts/NeueFrutigerWorld-Bold.vi_VN.ttf') format('truetype');
+    font-family: 'Neue Frutiger World vi';
+    font-display: swap;
+}
+
+@font-face {
+    font-style: normal;
+    font-weight: 800;
+    src:
+        url('/fonts/NeueFrutigerWorld-Heavy.vi_VN.woff2') format('woff2'),
+        url('/fonts/NeueFrutigerWorld-Heavy.vi_VN.woff') format('woff'),
+        url('/fonts/NeueFrutigerWorld-Heavy.vi_VN.ttf') format('truetype');
+    font-family: 'Neue Frutiger World vi';
+    font-display: swap;
+}
+
+@font-face {
+    font-style: normal;
+    font-weight: 900;
+    src:
+        url('/fonts/NeueFrutigerWorld-XBlack.vi_VN.woff2') format('woff2'),
+        url('/fonts/NeueFrutigerWorld-XBlack.vi_VN.woff') format('woff'),
+        url('/fonts/NeueFrutigerWorld-XBlack.vi_VN.ttf') format('truetype');
+    font-family: 'Neue Frutiger World vi';
     font-display: swap;
 }

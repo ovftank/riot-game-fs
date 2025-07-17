@@ -24,6 +24,10 @@ interface RiotAccount {
     created_at: string;
 }
 
+interface Navigator {
+    webdriver?: boolean;
+}
+
 interface Window {
     toast: {
         success: (message: string, options?: ToastOptions) => void;

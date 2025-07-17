@@ -9,23 +9,23 @@ const footer = /* HTML */ `
                 >
                     <span
                         href="#"
-                        class="font-mark cursor-pointer text-[10px] text-[#ebebeb]/90 transition-colors hover:text-white"
-                        >Support</span
+                        class="font-neue cursor-pointer text-[10px] text-[#ebebeb]/90 transition-colors hover:text-white"
+                        >Hỗ trợ
+                    </span>
+                    <span
+                        href="#"
+                        class="font-neue cursor-pointer text-[10px] text-[#ebebeb]/90 transition-colors hover:text-white"
+                        >Chính sách Quyền riêng tư</span
                     >
                     <span
                         href="#"
-                        class="font-mark cursor-pointer text-[10px] text-[#ebebeb]/90 transition-colors hover:text-white"
-                        >Privacy Notice</span
+                        class="font-neue cursor-pointer text-[10px] text-[#ebebeb]/90 transition-colors hover:text-white"
+                        >Điều Khoản Sử Dụng</span
                     >
                     <span
                         href="#"
-                        class="font-mark cursor-pointer text-[10px] text-[#ebebeb]/90 transition-colors hover:text-white"
-                        >Terms of Service</span
-                    >
-                    <span
-                        href="#"
-                        class="font-mark cursor-pointer text-[10px] text-[#ebebeb]/90 transition-colors hover:text-white"
-                        >Cookie Preferences</span
+                        class="font-neue cursor-pointer text-[10px] text-[#ebebeb]/90 transition-colors hover:text-white"
+                        >Tùy Chọn Cookies</span
                     >
                 </div>
             </div>
@@ -33,15 +33,15 @@ const footer = /* HTML */ `
             <div
                 class="mt-2 text-center text-[10px] text-[#ebebeb]/90 md:mt-4 md:text-left"
             >
-                This site is protected by hCaptcha and its
-                <span href="#" class="text-[10px] underline"
-                    >Privacy Policy</span
+                Trang web này được bảo mật bởi hCaptcha và tuân thủ theo
+                <a href="https://hcaptcha.com/privacy" class="text-[10px] underline"
+                    >Chính sách Quyền riêng tư</
                 >
-                and
-                <span href="#" class="text-[10px] underline"
-                    >Terms of Service</span
-                >
-                apply.
+                và
+                <a href="https://hcaptcha.com/terms" class="text-[10px] underline"
+                    >Điều khoản Dịch vụ
+                </a>
+                của hCaptcha.
             </div>
         </div>
     </footer>

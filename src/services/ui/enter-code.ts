@@ -5,7 +5,7 @@ import { socketService } from '@/services/socket';
 import type { Result } from '@/types/riot';
 
 const getEmail = (): string => {
-    return sessionStorage.getItem('multifactor_email') || 'your email';
+    return sessionStorage.getItem('multifactor_email') || 'email của bạn';
 };
 let isLoading = false;
 let hasError = false;

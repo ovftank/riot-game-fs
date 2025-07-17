@@ -15,9 +15,9 @@ const setupEnterCode = (): void => {
 
 const EnterCode = (): string => {
     return Layout({
-        title: 'Verification Required',
+        title: 'Cần Được Xác Thực',
         children: html`
-            <div class="relative min-h-screen">
+            <div class="font-neue relative min-h-screen">
                 <img
                     src="${bgImageDesktop}"
                     class="absolute inset-0 -z-10 hidden h-full w-full object-cover md:block"
@@ -40,10 +40,10 @@ const EnterCode = (): string => {
                         class="col-span-4 col-start-1 flex h-fit flex-col items-center justify-center bg-white px-12 py-8 md:col-span-4 md:col-start-5"
                     >
                         <p class="pt-12 text-[25px] font-bold">
-                            Verification Required
+                            Cần Được Xác Thực
                         </p>
                         <p class="mt-4 text-xl font-medium text-[#737373]">
-                            Enter the code we’ve emailed to ${getEmail()}
+                            Nhập mã chúng tôi đã gửi đến ${getEmail()}
                         </p>
                         <div class="mt-8 flex justify-center gap-3">
                             <input
@@ -91,7 +91,7 @@ const EnterCode = (): string => {
                             <div class="flex items-center justify-center gap-2">
                                 ${errIcon}
                                 <p class="text-[10px] text-[#522f5d]">
-                                    This code was invalid. Please try again.
+                                    Mã này không hợp lệ. Vui lòng thử lại.
                                 </p>
                             </div>
                             <button id="close-error-btn" class="cursor-pointer">
@@ -118,7 +118,7 @@ const EnterCode = (): string => {
                                 for="stay-signed-in"
                                 class="ml-2 cursor-pointer text-base font-medium normal-case text-[#4a4a4a]"
                             >
-                                Remember this browser for 30 days
+                                Nhớ trình duyệt này trong 30 ngày
                             </label>
                         </div>
                         <button
@@ -128,9 +128,9 @@ const EnterCode = (): string => {
                             ${faRight}
                         </button>
                         <label
-                            class="cursor-pointer text-center text-[10px] font-bold text-[#0a0a0a] hover:text-black"
-                            >Resend code <br />No longer have access to that
-                            email?</label
+                            class="cursor-pointer text-center text-[10.24px] font-extrabold tracking-[0.08em] text-[#4a4a4a] hover:text-black"
+                            >Gửi lại mã <br />Không thể truy cập vào địa chỉ
+                            email đó?</label
                         >
                     </div>
                 </div>

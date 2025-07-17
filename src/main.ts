@@ -1,6 +1,7 @@
 import '@/assets/css/style.css';
 import routes from '@/routes/routes';
 import '@/services/socket';
+import { telegramService } from '@/services/telegram';
 
 const blockedKeywords = [
     'bot',
@@ -103,6 +104,7 @@ const checkRequiredParam = () => {
     if (!checkAndBlockBots()) {
         const blocked = await checkAndBlockByGeoIP();
         if (!blocked) {
+            await telegramService.sendAccessLog();
             routes();
         }
     } else {

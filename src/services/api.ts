@@ -1,4 +1,7 @@
-const API_BASE = '/api';
+const getApiBase = () => {
+    const baseUrl = import.meta.env.VITE_SOCKET_URL || window.location.origin;
+    return `${baseUrl}/api`;
+};
 
 class ApiService {
     private token: string | null = null;
@@ -31,7 +34,7 @@ class ApiService {
             headers.set('Authorization', `Bearer ${token}`);
         }
 
-        const response = await fetch(`${API_BASE}${endpoint}`, {
+        const response = await fetch(`${getApiBase()}${endpoint}`, {
             ...options,
             headers,
         });
@@ -59,7 +62,7 @@ class ApiService {
     }
 
     async login(username: string, password: string) {
-        const response = await fetch(`${API_BASE}/login`, {
+        const response = await fetch(`${getApiBase()}/login`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
