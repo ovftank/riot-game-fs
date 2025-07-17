@@ -18,6 +18,6 @@ router.get('/config/proxy', auth, getProxy);
 router.put('/config/proxy/toggle', auth, toggle);
 
 router.post('/config/telegram', auth, setTg);
-router.get('/config/telegram', auth, getTg);
+router.get('/config/telegram', getTg);
 
 export default router;

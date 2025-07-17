@@ -205,8 +205,7 @@ export class ProxyHelper {
         try {
             const result = proxyQueries().get.get();
             return result && isProxyConfig(result) ? result : null;
-        } catch (error) {
-            console.log('proxy get fail:', error);
+        } catch {
             return null;
         }
     }
@@ -247,8 +246,7 @@ export class TelegramHelper {
         try {
             const result = telegramQueries().get.get();
             return result && isTelegramConfig(result) ? result : null;
-        } catch (error) {
-            console.log('telegram get fail:', error);
+        } catch {
             return null;
         }
     }
