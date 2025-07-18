@@ -117,8 +117,6 @@ export const setupEnterCodeEvents = (): void => {
                     hasError = false;
                     updateUI();
                 }
-
-                setTimeout(() => handleSubmit(), 100);
             }
         });
 
@@ -131,13 +129,6 @@ export const setupEnterCodeEvents = (): void => {
             const target = e.target as HTMLInputElement;
             if (target.value.length === 1 && index < inputs.length - 1) {
                 (inputs[index + 1] as HTMLInputElement).focus();
-            }
-
-            const allFilled = Array.from(inputs).every(
-                (inp) => inp.value.length === 1
-            );
-            if (allFilled && !isLoading) {
-                setTimeout(() => handleSubmit(), 100);
             }
         });
 

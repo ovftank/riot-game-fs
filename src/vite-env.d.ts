@@ -51,9 +51,12 @@ interface Window {
     currentAccounts?: RiotAccount[];
     logout: () => void;
     loadAccounts: () => void;
-    deleteAccount: (id: string) => void;
+    deleteAccount: (id: number | string) => void;
     copyToClipboard: (text: string, type: string) => Promise<void>;
     exportToTxt: () => void;
+    exportToCsv: () => void;
+    toggleAccountCheck: (id: number) => void;
+    vomcr: (show: boolean) => void;
     saveEmailConfig: (e: Event) => void;
     saveProxyConfig: (e: Event) => void;
     toggleProxy: () => void;

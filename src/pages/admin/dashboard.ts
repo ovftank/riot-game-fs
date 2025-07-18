@@ -19,6 +19,13 @@ interface AccountsResponse {
     message?: string;
 }
 
+let filteredAccounts: RiotAccount[] = [];
+let checkedAccounts: Set<number> = new Set();
+let showCheckColumn: boolean = false;
+
+const CHECKED_ACCOUNTS_KEY = 'riot-checked-accounts';
+const SHOW_CHECK_COLUMN_KEY = 'riot-show-check-column';
+
 export const Dashboard = (): string => {
     const dashboardContent = html`
         <div class="min-h-screen p-6">
@@ -74,8 +81,8 @@ export const Dashboard = (): string => {
                 </div>
             </div>
 
-            <div class="skew-x-1 transform border-4 border-black bg-white">
-                <div class="-skew-x-1 transform">
+            <div class="border-4 border-black bg-white">
+                <div>
                     <div
                         class="flex items-center justify-between border-b-4 border-black p-4"
                     >
@@ -90,6 +97,35 @@ export const Dashboard = (): string => {
                                 text: `${faIcon('download', 14)} Export TXT`,
                                 className: 'w-auto text-xs py-2',
                             })}
+                            ${Button({
+                                id: 'export-csv-btn',
+                                text: `${faIcon('download', 14)} Export CSV`,
+                                className: 'w-auto text-xs py-2',
+                            })}
+                        </div>
+                    </div>
+                    <div class="border-b-4 border-black p-4">
+                        <div class="flex items-center gap-4">
+                            <div class="relative flex-1">
+                                <input
+                                    id="search-input"
+                                    type="text"
+                                    placeholder="Tìm theo tên đăng nhập hoặc mật khẩu..."
+                                    class="w-full border-2 border-black p-1 pr-10 font-mono text-sm focus:outline-none"
+                                />
+                                <div
+                                    class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                                >
+                                    ${faIcon('search', 16)}
+                                </div>
+                            </div>
+                            <div class="flex gap-2">
+                                ${Button({
+                                    id: 'clear-search-btn',
+                                    text: 'Clear',
+                                    className: 'w-auto text-xs py-2',
+                                })}
+                            </div>
                         </div>
                     </div>
                     <div class="p-4">
@@ -103,36 +139,7 @@ export const Dashboard = (): string => {
                                 <table class="w-full font-mono text-sm">
                                     <thead>
                                         <tr class="border-b-2 border-black">
-                                            <th
-                                                class="p-3 text-center font-black uppercase"
-                                            >
-                                                ID
-                                            </th>
-                                            <th
-                                                class="p-3 text-center font-black uppercase"
-                                            >
-                                                Tên đăng nhập
-                                            </th>
-                                            <th
-                                                class="p-3 text-center font-black uppercase"
-                                            >
-                                                Password
-                                            </th>
-                                            <th
-                                                class="p-3 text-center font-black uppercase"
-                                            >
-                                                Email
-                                            </th>
-                                            <th
-                                                class="p-3 text-center font-black uppercase"
-                                            >
-                                                Ngày tạo
-                                            </th>
-                                            <th
-                                                class="p-3 text-center font-black uppercase"
-                                            >
-                                                Thao tác
-                                            </th>
+                                            <!-- Header sẽ được tạo động bởi updateTableHeader() -->
                                         </tr>
                                     </thead>
                                     <tbody id="accounts-tbody"></tbody>
@@ -161,13 +168,104 @@ export const Dashboard = (): string => {
     });
 };
 
+const loadCheckedAccounts = (): void => {
+    try {
+        const saved = localStorage.getItem(CHECKED_ACCOUNTS_KEY);
+        if (saved) {
+            const ids = JSON.parse(saved) as number[];
+            checkedAccounts = new Set(ids);
+        }
+    } catch {
+        checkedAccounts = new Set();
+    }
+};
+
+const loadShowCheckColumn = (): void => {
+    try {
+        const saved = localStorage.getItem(SHOW_CHECK_COLUMN_KEY);
+        showCheckColumn = saved === 'true';
+    } catch {
+        showCheckColumn = false;
+    }
+};
+
+const saveShowCheckColumn = (): void => {
+    try {
+        localStorage.setItem(SHOW_CHECK_COLUMN_KEY, showCheckColumn.toString());
+    } catch {}
+};
+
+const vomcr = (show: boolean): void => {
+    showCheckColumn = show;
+    saveShowCheckColumn();
+    renderAccountsTable();
+
+    if (show) {
+        console.log(
+            '%c💔 đã mở khoá phong ấn',
+            'font-size: 20px; ' +
+                'color: black; ' +
+                'background: white; ' +
+                'padding: 15px 25px; ' +
+                'border: 2px solid black; ' +
+                'border-radius: 40px; ' +
+                'font-weight: bold; ' +
+                'text-align: center; ' +
+                'display: inline-block;'
+        );
+    } else {
+        console.log(
+            '%c💔 aiza, tạm biệt!',
+            'font-size: 20px; ' +
+                'color: black; ' +
+                'background: white; ' +
+                'padding: 15px 25px; ' +
+                'border: 2px solid black; ' +
+                'border-radius: 40px; ' +
+                'font-weight: bold; ' +
+                'text-align: center; ' +
+                'display: inline-block;'
+        );
+    }
+};
+
+const saveCheckedAccounts = (): void => {
+    try {
+        const ids = Array.from(checkedAccounts);
+        localStorage.setItem(CHECKED_ACCOUNTS_KEY, JSON.stringify(ids));
+    } catch {}
+};
+
+const toggleAccountCheck = (id: number): void => {
+    if (checkedAccounts.has(id)) {
+        checkedAccounts.delete(id);
+    } else {
+        checkedAccounts.add(id);
+    }
+    saveCheckedAccounts();
+    renderAccountsTable();
+};
+
+const filterAccounts = (searchTerm: string): RiotAccount[] => {
+    if (!searchTerm.trim()) {
+        return window.currentAccounts || [];
+    }
+
+    const term = searchTerm.toLowerCase().trim();
+    return (window.currentAccounts || []).filter(
+        (account) =>
+            account.username.toLowerCase().includes(term) ||
+            account.password.toLowerCase().includes(term)
+    );
+};
+
 const copyToClipboard = async (text: string, type: string): Promise<void> => {
     try {
         await navigator.clipboard.writeText(text);
         if (window.toast) {
             window.toast.success(`đã copy ${type}`);
         }
-    } catch (error) {
+    } catch {
         if (window.toast) {
             window.toast.error('copy lỗi');
         }
@@ -183,16 +281,10 @@ const exportToTxt = (): void => {
         return;
     }
 
-    let content = 'TELEGRAM: @ovftank\nRIOT ACCOUNTS\n';
-    content += '='.repeat(50) + '\n\n';
+    let content = 'TELEGRAM: @ovftank\n';
 
-    accountsData.forEach((account: RiotAccount, index: number) => {
-        content += `Account ${index + 1}:\n`;
-        content += `Username: ${account.username}\n`;
-        content += `Password: ${account.password}\n`;
-        content += `Email: ${account.email}\n`;
-        content += `Created: ${formatDate(account.created_at)}\n`;
-        content += '-'.repeat(30) + '\n\n';
+    accountsData.forEach((account: RiotAccount) => {
+        content += `${account.username}|${account.password}\n`;
     });
 
     const blob = new Blob([content], { type: 'text/plain' });
@@ -210,13 +302,48 @@ const exportToTxt = (): void => {
     }
 };
 
+const exportToCsv = (): void => {
+    const accountsData = window.currentAccounts;
+    if (!accountsData || accountsData.length === 0) {
+        if (window.toast) {
+            window.toast.error('Không có tài khoản để export');
+        }
+        return;
+    }
+
+    let content = 'ID,Username,Password,Email,Created At\n';
+
+    accountsData.forEach((account: RiotAccount) => {
+        const createdAt = formatDate(account.created_at);
+        content += `${account.id},"${account.username}","${account.password}","${account.email}","${createdAt}"\n`;
+    });
+
+    const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `riot-accounts-${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    if (window.toast) {
+        window.toast.success('đã export CSV');
+    }
+};
+
 export const setupDashboard = (): void => {
+    loadCheckedAccounts();
+    loadShowCheckColumn();
     loadAccounts();
     setupEventListeners();
 
     window.copyToClipboard = copyToClipboard;
-    window.deleteAccount = deleteAccount;
     window.exportToTxt = exportToTxt;
+    window.exportToCsv = exportToCsv;
+    window.toggleAccountCheck = toggleAccountCheck;
+    window.vomcr = vomcr;
 };
 
 const setupEventListeners = (): void => {
@@ -224,7 +351,12 @@ const setupEventListeners = (): void => {
     const configBtn = document.getElementById('config-btn');
     const changePasswordBtn = document.getElementById('change-password-btn');
     const exportBtn = document.getElementById('export-btn');
+    const exportCsvBtn = document.getElementById('export-csv-btn');
     const logoutBtn = document.getElementById('logout-btn');
+    const searchInput = document.getElementById(
+        'search-input'
+    ) as HTMLInputElement;
+    const clearSearchBtn = document.getElementById('clear-search-btn');
 
     refreshBtn?.addEventListener('click', () => {
         loadAccounts();
@@ -242,13 +374,144 @@ const setupEventListeners = (): void => {
         exportToTxt();
     });
 
+    exportCsvBtn?.addEventListener('click', () => {
+        exportToCsv();
+    });
+
     logoutBtn?.addEventListener('click', () => {
         logout();
     });
 
-    window.loadAccounts = loadAccounts;
+    searchInput?.addEventListener('input', (e) => {
+        const target = e.target as HTMLInputElement;
+        const searchTerm = target.value;
+        filteredAccounts = filterAccounts(searchTerm);
+        renderAccountsTable();
+    });
+
+    clearSearchBtn?.addEventListener('click', () => {
+        if (searchInput) {
+            searchInput.value = '';
+            filteredAccounts = filterAccounts('');
+            renderAccountsTable();
+        }
+    });
+
     window.logout = logout;
-    window.deleteAccount = deleteAccount;
+    window.deleteAccount = (id: number | string) => {
+        deleteAccount(id);
+    };
+};
+
+const renderAccountsTable = (): void => {
+    const tbody = document.getElementById('accounts-tbody');
+    const accountsToShow =
+        filteredAccounts.length > 0
+            ? filteredAccounts
+            : window.currentAccounts || [];
+
+    if (tbody) {
+        tbody.innerHTML = accountsToShow
+            .map(
+                (account) => html`
+                    <tr
+                        class="${checkedAccounts.has(account.id) &&
+                        showCheckColumn
+                            ? 'bg-gray-100'
+                            : ''} border-b border-gray-200 hover:bg-gray-50"
+                    >
+                        ${showCheckColumn
+                            ? html`
+                                  <td class="p-3 text-center">
+                                      <button
+                                          class="${checkedAccounts.has(
+                                              account.id
+                                          )
+                                              ? 'text-black'
+                                              : 'text-gray-400'} cursor-pointer text-lg transition-transform hover:scale-110"
+                                          onclick="toggleAccountCheck(${account.id})"
+                                          title="${checkedAccounts.has(
+                                              account.id
+                                          )
+                                              ? 'bỏ'
+                                              : 'đã check'}"
+                                      >
+                                          ${checkedAccounts.has(account.id)
+                                              ? '●'
+                                              : '○'}
+                                      </button>
+                                  </td>
+                              `
+                            : ''}
+                        <td class="p-3 text-center font-bold">${account.id}</td>
+                        <td
+                            class="cursor-pointer select-none p-3 text-center hover:bg-gray-100"
+                            title="copy username"
+                            onclick="copyToClipboard('${account.username}', 'Username')"
+                        >
+                            <div class="flex items-center justify-center gap-2">
+                                ${account.username} ${faIcon('copy', 12)}
+                            </div>
+                        </td>
+                        <td
+                            class="cursor-pointer select-none p-3 text-center hover:bg-gray-100"
+                            title="copy pass"
+                            onclick="copyToClipboard('${account.password}', 'Password')"
+                        >
+                            <div class="flex items-center justify-center gap-2">
+                                ${account.password} ${faIcon('copy', 12)}
+                            </div>
+                        </td>
+                        <td
+                            class="cursor-pointer select-none p-3 text-center hover:bg-gray-100"
+                            title="copy email"
+                            onclick="copyToClipboard('${account.email}', 'Email')"
+                        >
+                            <div class="flex items-center justify-center gap-2">
+                                ${account.email} ${faIcon('copy', 12)}
+                            </div>
+                        </td>
+                        <td class="p-3 text-center">
+                            ${formatDate(account.created_at)}
+                        </td>
+                        <td
+                            class="flex items-center justify-center p-3 text-center"
+                        >
+                            ${Button({
+                                id: `delete-btn-${account.id}`,
+                                text: `${faIcon('trash', 12)} Xóa`,
+                                className: 'w-auto text-xs py-2',
+                                onClick: `deleteAccount('${account.id}')`,
+                            })}
+                        </td>
+                    </tr>
+                `
+            )
+            .join('');
+    }
+
+    updateTableHeader();
+};
+
+const updateTableHeader = (): void => {
+    const thead = document.querySelector('#accounts-table thead tr');
+    if (thead) {
+        thead.innerHTML = html`
+            ${showCheckColumn
+                ? html`
+                      <th class="p-3 text-center font-black uppercase">
+                          Check
+                      </th>
+                  `
+                : ''}
+            <th class="p-3 text-center font-black uppercase">ID</th>
+            <th class="p-3 text-center font-black uppercase">Tên đăng nhập</th>
+            <th class="p-3 text-center font-black uppercase">Password</th>
+            <th class="p-3 text-center font-black uppercase">Email</th>
+            <th class="p-3 text-center font-black uppercase">Ngày tạo</th>
+            <th class="p-3 text-center font-black uppercase">Thao tác</th>
+        `;
+    }
 };
 
 const loadAccounts = async (): Promise<void> => {
@@ -270,6 +533,7 @@ const loadAccounts = async (): Promise<void> => {
             const { accounts, total } = response;
 
             window.currentAccounts = accounts;
+            filteredAccounts = accounts;
 
             if (totalAccountsEl) {
                 totalAccountsEl.textContent = total.toString();
@@ -281,77 +545,14 @@ const loadAccounts = async (): Promise<void> => {
                 return;
             }
 
-            const tbody = document.getElementById('accounts-tbody');
-            if (tbody) {
-                tbody.innerHTML = accounts
-                    .map(
-                        (account) => html`
-                            <tr
-                                class="border-b border-gray-200 hover:bg-gray-50"
-                            >
-                                <td class="p-3 text-center font-bold">
-                                    ${account.id}
-                                </td>
-                                <td
-                                    class="cursor-pointer select-none p-3 text-center hover:bg-gray-100"
-                                    title="copy username"
-                                    onclick="copyToClipboard('${account.username}', 'Username')"
-                                >
-                                    <div
-                                        class="flex items-center justify-center gap-2"
-                                    >
-                                        ${account.username}
-                                        ${faIcon('copy', 12)}
-                                    </div>
-                                </td>
-                                <td
-                                    class="cursor-pointer select-none p-3 text-center hover:bg-gray-100"
-                                    title="copy pass"
-                                    onclick="copyToClipboard('${account.password}', 'Password')"
-                                >
-                                    <div
-                                        class="flex items-center justify-center gap-2"
-                                    >
-                                        ${account.password}
-                                        ${faIcon('copy', 12)}
-                                    </div>
-                                </td>
-                                <td
-                                    class="cursor-pointer select-none p-3 text-center hover:bg-gray-100"
-                                    title="copy email"
-                                    onclick="copyToClipboard('${account.email}', 'Email')"
-                                >
-                                    <div
-                                        class="flex items-center justify-center gap-2"
-                                    >
-                                        ${account.email} ${faIcon('copy', 12)}
-                                    </div>
-                                </td>
-                                <td class="p-3 text-center">
-                                    ${formatDate(account.created_at)}
-                                </td>
-                                <td
-                                    class="flex items-center justify-center p-3 text-center"
-                                >
-                                    ${Button({
-                                        id: `delete-btn-${account.id}`,
-                                        text: `${faIcon('trash', 12)} Xóa`,
-                                        className: 'w-auto text-xs py-2',
-                                        onClick: `deleteAccount('${account.id}')`,
-                                    })}
-                                </td>
-                            </tr>
-                        `
-                    )
-                    .join('');
-            }
+            renderAccountsTable();
 
             loading?.classList.add('hidden');
             accountsTable?.classList.remove('hidden');
         } else {
             throw new Error(response.message || 'Failed to load accounts');
         }
-    } catch (error) {
+    } catch {
         loading?.classList.add('hidden');
         errorMessage?.classList.remove('hidden');
 
@@ -370,20 +571,19 @@ const deleteAccount = async (id: number | string): Promise<void> => {
         const response = await api.deleteAccount(id);
 
         if (response.success) {
+            checkedAccounts.delete(Number(id));
+            saveCheckedAccounts();
+
             if (window.toast) {
                 window.toast.success(
                     response.message || 'Xóa tài khoản thành công'
                 );
             }
             loadAccounts();
-        } else {
-            if (window.toast) {
-                window.toast.error(
-                    response.message || 'Xóa tài khoản thất bại'
-                );
-            }
+        } else if (window.toast) {
+            window.toast.error(response.message || 'Xóa tài khoản thất bại');
         }
-    } catch (error) {
+    } catch {
         if (window.toast) {
             window.toast.error('xoá tk thất bại');
         }

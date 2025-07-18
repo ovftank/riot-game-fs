@@ -9,6 +9,8 @@ import {
     faCopy,
     faTrash,
     faSignOutAlt,
+    faSearch,
+    faQuestion,
     IconName,
 } from '@fortawesome/free-solid-svg-icons';
 library.add(
@@ -20,7 +22,9 @@ library.add(
     faDownload,
     faCopy,
     faTrash,
-    faSignOutAlt
+    faSignOutAlt,
+    faSearch,
+    faQuestion
 );
 
 const faIcon = (iconName: IconName, size = 16) => {

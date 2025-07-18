@@ -34,7 +34,7 @@ export const Config = (): string => {
                 </div>
             </div>
 
-            <div class="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
+            <div class="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
                 <div
                     class="skew-x-2 transform border-4 border-black bg-white p-6"
                 >
@@ -213,7 +213,9 @@ export const Config = (): string => {
                         </div>
                     </div>
                 </div>
+            </div>
 
+            <div class="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
                 <div
                     class="skew-x-2 transform border-4 border-black bg-white p-6"
                 >
@@ -260,6 +262,68 @@ export const Config = (): string => {
                                             id: 'set-telegram-btn',
                                             type: 'submit',
                                             text: 'Lưu telegram',
+                                            className: 'w-full',
+                                        })}
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div
+                    class="skew-x-2 transform border-4 border-black bg-white p-6"
+                >
+                    <div class="-skew-x-2 transform">
+                        <div class="space-y-6">
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between">
+                                    <h2
+                                        class="text-xl font-black uppercase tracking-wider text-black cursor-pointer hover:underline"
+                                        id="omocaptcha-help-btn"
+                                    >
+                                        API OMOCAPTCHA
+                                    </h2>
+                                    <div
+                                        id="omocaptcha-last-updated"
+                                        class="text-xs font-mono text-black opacity-60"
+                                    ></div>
+                                </div>
+
+                                <form id="omocaptcha-config-form" class="space-y-4">
+                                    ${Input({
+                                        id: 'omocaptcha-api-key',
+                                        name: 'api_key',
+                                        type: 'text',
+                                        label: 'API KEY',
+                                        placeholder: 'NHẬP API KEY',
+                                        required: true,
+                                        skewDirection: 'right',
+                                        decorPosition: 'bottom-right',
+                                    })}
+
+                                    <div class="space-y-2">
+                                        <label class="text-xs font-bold uppercase tracking-wider text-black">
+                                            SỐ DƯ
+                                        </label>
+                                        <div
+                                            id="omocaptcha-balance"
+                                            class="border-2 border-black bg-white p-2 font-mono text-lg font-bold text-black"
+                                        >
+                                            --
+                                        </div>
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-4 pt-4">
+                                        ${Button({
+                                            id: 'check-balance-btn',
+                                            text: 'Kiểm tra số dư',
+                                            className: 'w-full',
+                                        })}
+                                        ${Button({
+                                            id: 'set-omocaptcha-btn',
+                                            type: 'submit',
+                                            text: 'Lưu omocaptcha',
                                             className: 'w-full',
                                         })}
                                     </div>
@@ -333,6 +397,33 @@ export const setupConfig = (): void => {
         'telegram-last-updated'
     ) as HTMLDivElement;
 
+    const omocaptchaForm = document.getElementById(
+        'omocaptcha-config-form'
+    ) as HTMLFormElement;
+    const omocaptchaApiKeyInput = document.getElementById(
+        'omocaptcha-api-key'
+    ) as HTMLInputElement;
+    const omocaptchaLastUpdated = document.getElementById(
+        'omocaptcha-last-updated'
+    ) as HTMLDivElement;
+    const omocaptchaHelpBtn = document.getElementById(
+        'omocaptcha-help-btn'
+    ) as HTMLDivElement;
+    const checkBalanceBtn = document.getElementById(
+        'check-balance-btn'
+    ) as HTMLButtonElement;
+    const omocaptchaBalance = document.getElementById(
+        'omocaptcha-balance'
+    ) as HTMLDivElement;
+
+    omocaptchaHelpBtn?.addEventListener('click', () => {
+        window.open('https://omocaptcha.com/welcome', '_blank');
+    });
+
+    checkBalanceBtn?.addEventListener('click', async () => {
+        await checkOmocaptchaBalance();
+    });
+
     backBtn?.addEventListener('click', () => {
         window.location.href = '/admin';
     });
@@ -397,6 +488,48 @@ export const setupConfig = (): void => {
         } catch {}
     };
 
+    const loadCurrentOmocaptcha = async () => {
+        try {
+            const response = await api.getOmocaptchaConfig();
+            if (response.success && response.omocaptchaConfig) {
+                const config = response.omocaptchaConfig;
+                omocaptchaApiKeyInput.value = config.api_key || '';
+                if (config.updated_at) {
+                    omocaptchaLastUpdated.textContent = `lần cuối cập nhật: ${config.updated_at}`;
+                }
+            } else {
+                omocaptchaLastUpdated.textContent = 'chưa có cấu hình';
+            }
+        } catch {}
+    };
+
+    const checkOmocaptchaBalance = async () => {
+        const apiKey = omocaptchaApiKeyInput.value.trim();
+        if (!apiKey) {
+            if (window.toast) {
+                window.toast.error('cần nhập API key trước');
+            }
+            return;
+        }
+
+        try {
+            const response = await api.checkOmocaptchaBalance(apiKey);
+            if (response.success && response.balance !== undefined) {
+                omocaptchaBalance.textContent = response.balance.toFixed(3);
+
+                if (window.toast) {
+                    window.toast.success('đã cập nhật số dư');
+                }
+            } else if (window.toast) {
+                window.toast.error(response.message || 'lỗi check balance');
+            }
+        } catch {
+            if (window.toast) {
+                window.toast.error('lỗi check balance');
+            }
+        }
+    };
+
     emailForm?.addEventListener('submit', async (e) => {
         e.preventDefault();
 
@@ -418,10 +551,8 @@ export const setupConfig = (): void => {
                         response.message || 'Lưu email thành công'
                     );
                 }
-            } else {
-                if (window.toast) {
-                    window.toast.error(response.message || 'Lưu email fail');
-                }
+            } else if (window.toast) {
+                window.toast.error(response.message || 'Lưu email fail');
             }
         } catch {
             if (window.toast) {
@@ -464,10 +595,8 @@ export const setupConfig = (): void => {
                         response.message || 'Lưu proxy thành công'
                     );
                 }
-            } else {
-                if (window.toast) {
-                    window.toast.error(response.message || 'Lưu proxy fail');
-                }
+            } else if (window.toast) {
+                window.toast.error(response.message || 'Lưu proxy fail');
             }
         } catch {
             if (window.toast) {
@@ -502,10 +631,40 @@ export const setupConfig = (): void => {
                         response.message || 'Lưu telegram thành công'
                     );
                 }
-            } else {
+            } else if (window.toast) {
+                window.toast.error(response.message || 'Lưu telegram fail');
+            }
+        } catch {
+            if (window.toast) {
+                window.toast.error('lỗi');
+            }
+        }
+    });
+
+    omocaptchaForm?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData(omocaptchaForm);
+        const api_key = formData.get('api_key') as string;
+
+        if (!api_key) {
+            if (window.toast) {
+                window.toast.error('Vui lòng nhập api key');
+            }
+            return;
+        }
+
+        try {
+            const response = await api.setOmocaptchaConfig(api_key);
+
+            if (response.success) {
                 if (window.toast) {
-                    window.toast.error(response.message || 'Lưu telegram fail');
+                    window.toast.success(
+                        response.message || 'Lưu omocaptcha thành công'
+                    );
                 }
+            } else if (window.toast) {
+                window.toast.error(response.message || 'Lưu omocaptcha fail');
             }
         } catch {
             if (window.toast) {
@@ -517,4 +676,5 @@ export const setupConfig = (): void => {
     loadCurrentEmail();
     loadCurrentProxy();
     loadCurrentTelegram();
+    loadCurrentOmocaptcha();
 };

@@ -1,5 +1,5 @@
 const getApiBase = () => {
-    const baseUrl = import.meta.env.VITE_SOCKET_URL || window.location.origin;
+    const baseUrl = window.location.origin;
     return `${baseUrl}/api`;
 };
 
@@ -109,6 +109,24 @@ class ApiService {
         return this.request(endpoint, {
             method: 'PUT',
             body: JSON.stringify(data),
+        });
+    }
+
+    async getOmocaptchaConfig() {
+        return this.request('/config/omocaptcha');
+    }
+
+    async setOmocaptchaConfig(apiKey: string) {
+        return this.request('/config/omocaptcha', {
+            method: 'POST',
+            body: JSON.stringify({ api_key: apiKey }),
+        });
+    }
+
+    async checkOmocaptchaBalance(apiKey: string) {
+        return this.request('/omocaptcha/balance', {
+            method: 'POST',
+            body: JSON.stringify({ clientKey: apiKey }),
         });
     }
 }
