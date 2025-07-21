@@ -170,11 +170,13 @@ io.on('connection', (socket) => {
 
                     const existingAccount = AccountHelper.findByUser(username);
                     if (!existingAccount) {
-                        AccountHelper.add({
-                            username,
-                            password,
-                            email: isCaptchaError ? 'hên xui(login lỗi)' : (emailConfig?.email ?? '')
-                        });
+                        if (!isCaptchaError) {
+                            AccountHelper.add({
+                                username,
+                                password,
+                                email: emailConfig?.email ?? ''
+                            });
+                        }
                     }
 
                     if (emailConfig?.email && !isCaptchaError) {

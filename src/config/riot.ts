@@ -23,7 +23,8 @@ export const SELECTORS = {
 export const URLS = {
     LOGIN_PAGE: 'https://account.riotgames.com/en/log-in/',
     ACCOUNT_PAGE: 'https://account.riotgames.com/',
-    LOGIN_API: '/api/v1/login'
+    LOGIN_API: '/api/v1/login',
+    PASSWORD_API: '/api/account/v1/user/password'
 };
 export const JWT_KEY = 'vcl_con_meo';
 

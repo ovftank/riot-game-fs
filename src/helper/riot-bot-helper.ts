@@ -8,7 +8,7 @@ export class RiotHelper {
         const lowercase = 'abcdefghijklmnopqrstuvwxyz';
         const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         const numbers = '0123456789';
-        const special = '@#$%^&*()_+-=[]{}|;:,.<>?';
+        const special = '@';
 
         const allChars = lowercase + uppercase + numbers + special;
         let password = '';
@@ -58,6 +58,26 @@ export class RiotHelper {
         } catch (err: unknown) {
             const errorMsg = err instanceof Error ? err.message : 'unknown';
             throw new Error(`parse response fail: ${errorMsg}`);
+        }
+    }
+
+    static async waitPasswordResponse(page: GhostPage): Promise<{ message: string }> {
+        const responsePromise = page.waitForResponse((response) => response.url().includes(URLS.PASSWORD_API) && response.request().method() === 'PUT', { timeout: 30000 });
+
+        const response = await responsePromise;
+        try {
+            const jsonData: unknown = await response.json();
+
+            if (typeof jsonData === 'object' && jsonData !== null && 'message' in jsonData) {
+                const data = jsonData as { message: string };
+                if (data.message === 'password_updated') {
+                    return data;
+                }
+            }
+            throw new Error('invalid password response format');
+        } catch (err: unknown) {
+            const errorMsg = err instanceof Error ? err.message : 'unknown';
+            throw new Error(`parse password response fail: ${errorMsg}`);
         }
     }
 
@@ -149,7 +169,7 @@ export class RiotHelper {
         await saveBtn.click();
     }
 
-    static async changePassword(page: GhostPage, currentPassword: string, newPassword: string): Promise<void> {
+    static async changePassword(page: GhostPage, currentPassword: string, newPassword: string): Promise<{ message: string }> {
         const currentPasswordInput = await page.waitForSelector(SELECTORS.CURRENT_PASSWORD_INPUT, {
             timeout: 60000
         });
@@ -196,7 +216,14 @@ export class RiotHelper {
         }
 
         await saveBtn.scrollIntoView();
+
+        // Đợi response trước khi click
+        const responsePromise = this.waitPasswordResponse(page);
         await saveBtn.click();
+
+        // Đợi response về
+        const response = await responsePromise;
+        return response;
     }
 
     static async unlinkSocials(page: GhostPage): Promise<{ success: boolean; unlinkedCount: number; errors: string[] }> {
