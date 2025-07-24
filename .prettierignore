@@ -1,0 +1,13 @@
+node_modules
+
+omocaptcha-extension
+
+src/static
+
+dist
+build
+
+*.db
+*.db-shm
+*.db-wal
+

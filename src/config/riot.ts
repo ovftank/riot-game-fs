@@ -2,6 +2,7 @@ export const SELECTORS = {
     USERNAME_INPUT: '[data-testid="input-username"]',
     PASSWORD_INPUT: '[data-testid="input-password"]',
     LOGIN_SUBMIT: '[data-testid="btn-signin-submit"]',
+    LOGIN_ERROR: 'p[data-testid="error-message"]',
 
     COOKIE_ACCEPT: '.osano-cm-accept-all',
 

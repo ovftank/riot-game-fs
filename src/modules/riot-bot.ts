@@ -1,9 +1,11 @@
 import { URLS } from '@/config/riot';
-import { ProxyHelper } from '@/helper/database-helper';
+import { ProxyHelper, OmocaptchaHelper } from '@/helper/database-helper';
 import { RiotError, RiotHelper } from '@/helper/riot-bot-helper';
 import type { Result } from '@/types/riot';
 import type { GhostBrowser, GhostLaunchOptions, GhostPage } from 'puppeteer-ghost';
 import puppeteer from 'puppeteer-ghost';
+import fs from 'fs';
+import path from 'path';
 
 export class RiotBot {
     private browser: GhostBrowser | null;
@@ -16,7 +18,24 @@ export class RiotBot {
 
     async init(abortSignal?: AbortSignal) {
         const proxyConfig = ProxyHelper.get();
-        const launchOptions: GhostLaunchOptions = {};
+        const launchOptions: GhostLaunchOptions = {
+            pipe: true
+        };
+
+        const extensionPath = path.join(process.cwd(), 'omocaptcha-extension');
+        const omocaptchaConfig = OmocaptchaHelper.get();
+        if (omocaptchaConfig?.api_key && fs.existsSync(extensionPath)) {
+            const configPath = path.join(extensionPath, 'configs.json');
+            const config = JSON.parse(fs.readFileSync(configPath, 'utf8')) as { api_key: string };
+            config.api_key = omocaptchaConfig.api_key;
+            fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
+        }
+
+        if (fs.existsSync(extensionPath)) {
+            launchOptions.enableExtensions = [extensionPath];
+        } else {
+            console.log('extension path không tồn tại, skip load extension');
+        }
 
         if (proxyConfig?.enabled === 1 && proxyConfig.host && proxyConfig.port) {
             const proxyServer = `${proxyConfig.protocol}://${proxyConfig.host}:${proxyConfig.port}`;
@@ -61,8 +80,25 @@ export class RiotBot {
         await RiotHelper.closeCookiePopup(this.page);
     }
     async close() {
-        if (!this.browser) throw new Error('gọi method init trước!');
-        await this.browser.close();
+        if (!this.browser) return;
+
+        try {
+            if (this.page) {
+                try {
+                    await this.page.close();
+                } catch {
+                    //
+                }
+                this.page = null;
+            }
+
+            await this.browser.close();
+        } catch (err) {
+            console.log('lỗi close browser:', err);
+        } finally {
+            this.browser = null;
+            this.page = null;
+        }
     }
 
     async login(username: string, password: string): Promise<Result> {
@@ -70,10 +106,24 @@ export class RiotBot {
 
         try {
             await RiotHelper.fillLoginForm(this.page, username, password);
-            await RiotHelper.submitLogin(this.page);
-            const responseData = await RiotHelper.waitResponse(this.page);
+            const result = await RiotHelper.submitLogin(this.page);
 
-            return await RiotHelper.parseResponse(responseData, this.page);
+            if (result.type === 'error') {
+                return {
+                    success: false,
+                    error: result.errorText ?? 'lỗi k rõ'
+                };
+            }
+
+            if (!result.data) {
+                return {
+                    success: false,
+                    error: 'k có response data'
+                };
+            }
+
+            console.log('responseData', result.data);
+            return await RiotHelper.parseResponse(result.data, this.page);
         } catch (e) {
             RiotError.logErr('login', e);
             return {

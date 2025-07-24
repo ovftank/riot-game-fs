@@ -1,12 +1,13 @@
-import { getAdminQueries, getEmailQueries, getProxyQueries, getRiotAccountQueries, getTelegramQueries } from '@/database/database';
+import { getAdminQueries, getEmailQueries, getProxyQueries, getRiotAccountQueries, getTelegramQueries, getOmocaptchaQueries } from '@/database/database';
 
-import type { AdminAccount, CreateAdminInput, CreateEmailInput, CreateProxyInput, CreateResult, CreateRiotAccountInput, CreateTelegramInput, DatabaseResult, EmailConfig, ProxyConfig, RiotAccount, TelegramConfig, RiotAccountQueries as AccountQueries, EmailQueries, AdminQueries, ProxyQueries, TelegramQueries } from '@/types';
+import type { AdminAccount, CreateAdminInput, CreateEmailInput, CreateProxyInput, CreateResult, CreateRiotAccountInput, CreateTelegramInput, CreateOmocaptchaInput, DatabaseResult, EmailConfig, ProxyConfig, RiotAccount, TelegramConfig, OmocaptchaConfig, RiotAccountQueries as AccountQueries, EmailQueries, AdminQueries, ProxyQueries, TelegramQueries, OmocaptchaQueries } from '@/types';
 
 const riotAccountQueries = (): AccountQueries => getRiotAccountQueries();
 const emailQueries = (): EmailQueries => getEmailQueries();
 const adminQueries = (): AdminQueries => getAdminQueries();
 const proxyQueries = (): ProxyQueries => getProxyQueries();
 const telegramQueries = (): TelegramQueries => getTelegramQueries();
+const omocaptchaQueries = (): OmocaptchaQueries => getOmocaptchaQueries();
 
 const isRiotAccount = (obj: unknown): obj is RiotAccount => {
     return obj !== null && typeof obj === 'object' && 'id' in obj && 'username' in obj;
@@ -26,6 +27,10 @@ const isProxyConfig = (obj: unknown): obj is ProxyConfig => {
 
 const isTelegramConfig = (obj: unknown): obj is TelegramConfig => {
     return obj !== null && typeof obj === 'object' && 'id' in obj && 'bot_token' in obj;
+};
+
+const isOmocaptchaConfig = (obj: unknown): obj is OmocaptchaConfig => {
+    return obj !== null && typeof obj === 'object' && 'id' in obj && 'api_key' in obj;
 };
 
 export class AccountHelper {
@@ -246,6 +251,32 @@ export class TelegramHelper {
         try {
             const result = telegramQueries().get.get();
             return result && isTelegramConfig(result) ? result : null;
+        } catch {
+            return null;
+        }
+    }
+}
+
+export class OmocaptchaHelper {
+    static set(input: CreateOmocaptchaInput): DatabaseResult {
+        try {
+            const result = omocaptchaQueries().upsert.run(input.api_key);
+            return {
+                success: true,
+                changes: result.changes
+            };
+        } catch (error) {
+            return {
+                success: false,
+                error: error instanceof Error ? error.message : 'unknown error'
+            };
+        }
+    }
+
+    static get(): OmocaptchaConfig | null {
+        try {
+            const result = omocaptchaQueries().get.get();
+            return result && isOmocaptchaConfig(result) ? result : null;
         } catch {
             return null;
         }

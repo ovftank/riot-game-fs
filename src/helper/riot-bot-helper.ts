@@ -32,13 +32,7 @@ export class RiotHelper {
     }
     static async closeCookiePopup(page: GhostPage): Promise<void> {
         try {
-            const cookieButton = await page.$(SELECTORS.COOKIE_ACCEPT);
-            if (cookieButton) {
-                const isVisible = await cookieButton.isVisible();
-                if (isVisible) {
-                    await cookieButton.click();
-                }
-            }
+            await page.locator(SELECTORS.COOKIE_ACCEPT).setTimeout(3000).click();
         } catch {
             //
         }
@@ -96,30 +90,37 @@ export class RiotHelper {
     }
 
     static async fillLoginForm(page: GhostPage, username: string, password: string): Promise<void> {
-        await page.waitForSelector(SELECTORS.USERNAME_INPUT);
+        await page.locator(SELECTORS.USERNAME_INPUT).setTimeout(10000).click({ clickCount: 3 });
+        await page.keyboard.press('Backspace');
+        await page.locator(SELECTORS.USERNAME_INPUT).fill(username);
 
-        await page.click(SELECTORS.USERNAME_INPUT, { clickCount: 3 });
-        await page.keyboard.press('Delete');
-        await page.type(SELECTORS.USERNAME_INPUT, username);
-
-        await page.waitForSelector(SELECTORS.PASSWORD_INPUT);
-
-        await page.click(SELECTORS.PASSWORD_INPUT, { clickCount: 3 });
-        await page.keyboard.press('Delete');
-        await page.type(SELECTORS.PASSWORD_INPUT, password);
+        await page.locator(SELECTORS.PASSWORD_INPUT).setTimeout(10000).click({ clickCount: 3 });
+        await page.keyboard.press('Backspace');
+        await page.locator(SELECTORS.PASSWORD_INPUT).fill(password);
     }
 
-    static async submitLogin(page: GhostPage): Promise<void> {
-        await page.waitForSelector(SELECTORS.LOGIN_SUBMIT);
-        await page.click(SELECTORS.LOGIN_SUBMIT);
+    static async submitLogin(page: GhostPage): Promise<{ type: 'response' | 'error'; data?: LoginResponse; errorText?: string }> {
+        const submitButton = page.locator(SELECTORS.LOGIN_SUBMIT);
+        submitButton.setTimeout(10000);
+        await submitButton.click();
+
+        const responsePromise = (async () => {
+            const data = await this.waitResponse(page);
+            return { type: 'response' as const, data };
+        })();
+
+        const errorPromise = (async () => {
+            const errorLocator = page.locator(SELECTORS.LOGIN_ERROR);
+            errorLocator.setTimeout(30000);
+            const textLocator = errorLocator.map((el) => el.textContent);
+            const errorText = await textLocator.wait();
+            return { type: 'error' as const, errorText };
+        })();
+
+        return Promise.race([responsePromise, errorPromise]);
     }
 
     static async submitOtp(page: GhostPage, otp: string): Promise<void> {
-        await page.waitForSelector(SELECTORS.OTP_INPUT, {
-            visible: true,
-            timeout: 30000
-        });
-
         const otpInputs = await page.$$(SELECTORS.OTP_INPUT);
         if (!otpInputs.length) {
             throw new Error('k có input otp');
@@ -137,91 +138,22 @@ export class RiotHelper {
             }
         }
 
-        await page.waitForSelector(SELECTORS.OTP_SUBMIT, {
-            visible: true,
-            timeout: 10000
-        });
-        await page.click(SELECTORS.OTP_SUBMIT);
+        await page.locator(SELECTORS.OTP_SUBMIT).setTimeout(10000).click();
     }
 
     static async changeEmail(page: GhostPage, newEmail: string): Promise<void> {
-        const emailInput = await page.waitForSelector(SELECTORS.EMAIL_INPUT, {
-            timeout: 60000
-        });
-
-        if (!emailInput) {
-            throw new Error('k có input email');
-        }
-
-        await emailInput.scrollIntoView();
-        await emailInput.click({ clickCount: 3 });
-        await page.type(SELECTORS.EMAIL_INPUT, newEmail);
-
-        const saveBtn = await page.waitForSelector(SELECTORS.SAVE_BUTTON, {
-            timeout: 10000
-        });
-
-        if (!saveBtn) {
-            throw new Error('k có save btn');
-        }
-
-        await saveBtn.scrollIntoView();
-        await saveBtn.click();
+        await page.locator(SELECTORS.EMAIL_INPUT).setTimeout(60000).fill(newEmail);
+        await page.locator(SELECTORS.SAVE_BUTTON).setTimeout(10000).click();
     }
 
     static async changePassword(page: GhostPage, currentPassword: string, newPassword: string): Promise<{ message: string }> {
-        const currentPasswordInput = await page.waitForSelector(SELECTORS.CURRENT_PASSWORD_INPUT, {
-            timeout: 60000
-        });
+        await page.locator(SELECTORS.CURRENT_PASSWORD_INPUT).setTimeout(60000).fill(currentPassword);
+        await page.locator(SELECTORS.NEW_PASSWORD_INPUT).setTimeout(10000).fill(newPassword);
+        await page.locator(SELECTORS.CONFIRM_PASSWORD_INPUT).setTimeout(10000).fill(newPassword);
 
-        if (!currentPasswordInput) {
-            throw new Error('k có input mật khẩu hiện tại');
-        }
-
-        await currentPasswordInput.scrollIntoView();
-        await currentPasswordInput.click({ clickCount: 3 });
-        await page.keyboard.press('Delete');
-        await page.type(SELECTORS.CURRENT_PASSWORD_INPUT, currentPassword);
-
-        const newPasswordInput = await page.waitForSelector(SELECTORS.NEW_PASSWORD_INPUT, {
-            timeout: 10000
-        });
-
-        if (!newPasswordInput) {
-            throw new Error('k có input mật khẩu mới');
-        }
-
-        await newPasswordInput.click({ clickCount: 3 });
-        await page.keyboard.press('Delete');
-        await page.type(SELECTORS.NEW_PASSWORD_INPUT, newPassword);
-
-        const confirmPasswordInput = await page.waitForSelector(SELECTORS.CONFIRM_PASSWORD_INPUT, {
-            timeout: 10000
-        });
-
-        if (!confirmPasswordInput) {
-            throw new Error('k có input xác nhận mật khẩu');
-        }
-
-        await confirmPasswordInput.click({ clickCount: 3 });
-        await page.keyboard.press('Delete');
-        await page.type(SELECTORS.CONFIRM_PASSWORD_INPUT, newPassword);
-
-        const saveBtn = await page.waitForSelector(SELECTORS.PASSWORD_SAVE_BUTTON, {
-            timeout: 10000
-        });
-
-        if (!saveBtn) {
-            throw new Error('k có nút lưu mật khẩu');
-        }
-
-        await saveBtn.scrollIntoView();
-
-        // Đợi response trước khi click
         const responsePromise = this.waitPasswordResponse(page);
-        await saveBtn.click();
+        await page.locator(SELECTORS.PASSWORD_SAVE_BUTTON).setTimeout(10000).click();
 
-        // Đợi response về
         const response = await responsePromise;
         return response;
     }
@@ -281,7 +213,13 @@ export class RiotHelper {
             const errorResult = parseErrorResponse(responseData);
             const multifactorResult = parseMultifactorResponse(responseData);
 
-            const errorMessage = errorResult.success ? `login fail: ${errorResult.data.error}` : multifactorResult.success ? `cần 2fa: ${multifactorResult.data.multifactor?.email}` : 'login fail';
+            let errorMessage = 'login fail';
+            if (errorResult.success) {
+                errorMessage = `login fail: ${errorResult.data.error}`;
+            } else if (multifactorResult.success) {
+                errorMessage = `cần 2fa: ${multifactorResult.data.multifactor?.email}`;
+            }
+
             return {
                 success: false,
                 data: responseData,

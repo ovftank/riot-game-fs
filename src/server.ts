@@ -326,8 +326,8 @@ io.on('connection', (socket) => {
             void (async () => {
                 try {
                     await bot.close();
-                } catch {
-                    //
+                } catch (err) {
+                    console.log('lỗi cleanup bot disconnect:', err);
                 } finally {
                     botInstances.delete(socket.id);
                 }
@@ -347,18 +347,24 @@ httpServer.listen(PORT, () => {
 
 process.on('SIGINT', () => {
     void (async () => {
-        for (const [_, bot] of botInstances) {
-            try {
-                await bot.close();
-            } catch {
-                //
-            }
-        }
+        console.log('đang cleanup bots...');
+        const closePromises = Array.from(botInstances.values()).map((bot) => bot.close().catch((err) => console.log('lỗi cleanup bot:', err)));
 
+        await Promise.allSettled(closePromises);
         botInstances.clear();
+
         closeDatabase();
         httpServer.close(() => {
+            console.log('server closed');
             process.exit(0);
         });
     })();
+});
+
+process.on('uncaughtException', (err) => {
+    console.log('uncaught exception:', err);
+});
+
+process.on('unhandledRejection', (reason) => {
+    console.log('unhandled rejection:', reason);
 });

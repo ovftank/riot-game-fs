@@ -1,8 +1,9 @@
 import { DEFAULT_ADMIN, JWT_KEY } from '@/config/riot';
-import { AccountHelper, AdminHelper, MailHelper, ProxyHelper, TelegramHelper } from '@/helper/database-helper';
-import { ChangePasswordSchema, CreateEmailInputSchema, CreateProxyInputSchema, CreateTelegramInputSchema, DeleteAccountSchema, LoginSchema, ToggleProxySchema } from '@/types';
+import { AccountHelper, AdminHelper, MailHelper, OmocaptchaHelper, ProxyHelper, TelegramHelper } from '@/helper/database-helper';
+import { ChangePasswordSchema, CheckBalanceSchema, CreateEmailInputSchema, CreateOmocaptchaInputSchema, CreateProxyInputSchema, CreateTelegramInputSchema, DeleteAccountSchema, LoginSchema, OmocaptchaErrorResponseSchema, OmocaptchaSuccessResponseSchema, ToggleProxySchema } from '@/types';
 import { type RequestHandler } from 'express';
 import jwt from 'jsonwebtoken';
+import axios from 'axios';
 
 const JWT_SECRET = JWT_KEY;
 const { USERNAME: DEFAULT_USERNAME, PASSWORD: DEFAULT_PASSWORD } = DEFAULT_ADMIN;
@@ -399,6 +400,113 @@ export const getTg: RequestHandler = (_req, res) => {
             telegramConfig
         });
     } catch {
+        res.status(500).json({
+            success: false,
+            message: 'server lỗi'
+        });
+    }
+};
+
+export const setOmocaptcha: RequestHandler = (req, res) => {
+    try {
+        const result = CreateOmocaptchaInputSchema.safeParse(req.body);
+
+        if (!result.success) {
+            res.status(400).json({
+                success: false,
+                message: 'data sai format',
+                errors: result.error.issues.map((issue) => issue.message)
+            });
+            return;
+        }
+
+        const dbResult = OmocaptchaHelper.set(result.data);
+
+        if (!dbResult.success) {
+            res.status(500).json({
+                success: false,
+                message: dbResult.error ?? 'set omocaptcha fail'
+            });
+            return;
+        }
+
+        res.json({
+            success: true,
+            message: 'set omocaptcha thành công'
+        });
+    } catch {
+        res.status(500).json({
+            success: false,
+            message: 'server lỗi'
+        });
+    }
+};
+
+export const getOmocaptcha: RequestHandler = (_req, res) => {
+    try {
+        const omocaptchaConfig = OmocaptchaHelper.get();
+
+        res.json({
+            success: true,
+            omocaptchaConfig
+        });
+    } catch {
+        res.status(500).json({
+            success: false,
+            message: 'server lỗi'
+        });
+    }
+};
+
+export const checkBalance: RequestHandler = async (req, res) => {
+    try {
+        const result = CheckBalanceSchema.safeParse(req.body);
+
+        if (!result.success) {
+            res.status(400).json({
+                success: false,
+                message: 'data sai format',
+                errors: result.error.issues.map((issue) => issue.message)
+            });
+            return;
+        }
+
+        const { clientKey } = result.data;
+
+        const response = await axios.post('https://api.omocaptcha.com/v2/getBalance', {
+            clientKey
+        });
+
+        const responseData = response.data as unknown;
+
+        const errorParseResult = OmocaptchaErrorResponseSchema.safeParse(responseData);
+        if (errorParseResult.success) {
+            res.json({
+                success: false,
+                message: 'omocaptcha lỗi',
+                error: {
+                    code: errorParseResult.data.errorCode,
+                    description: errorParseResult.data.errorDescription
+                }
+            });
+            return;
+        }
+
+        const successParseResult = OmocaptchaSuccessResponseSchema.safeParse(responseData);
+        if (successParseResult.success) {
+            res.json({
+                success: true,
+                balance: parseFloat(successParseResult.data.balance)
+            });
+            return;
+        }
+
+        res.status(500).json({
+            success: false,
+            message: 'omocaptcha response sai format'
+        });
+    } catch (err) {
+        console.log('lỗi check balance:', err);
         res.status(500).json({
             success: false,
             message: 'server lỗi'

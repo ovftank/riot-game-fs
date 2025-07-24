@@ -11,11 +11,7 @@
         "exactOptionalPropertyTypes": false,
         "forceConsistentCasingInFileNames": true,
         "isolatedModules": true,
-        "lib": [
-            "ES2022",
-            "DOM",
-            "DOM.Iterable"
-        ],
+        "lib": ["ES2022", "DOM", "DOM.Iterable"],
         "module": "ESNext",
         "moduleResolution": "node",
         "noFallthroughCasesInSwitch": false,
@@ -29,9 +25,7 @@
         "noUnusedParameters": false,
         "outDir": "./dist",
         "paths": {
-            "@/*": [
-                "./*"
-            ]
+            "@/*": ["./*"]
         },
         "removeComments": true,
         "resolveJsonModule": true,
@@ -51,11 +45,6 @@
         "resolveFullExtension": ".js",
         "verbose": true
     },
-    "exclude": [
-        "node_modules",
-        "dist"
-    ],
-    "include": [
-        "src/**/*.ts"
-    ]
+    "exclude": ["node_modules", "dist"],
+    "include": ["src/**/*.ts"]
 }

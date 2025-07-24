@@ -1,6 +1,6 @@
 import Database from 'better-sqlite3';
 import { join } from 'path';
-import type { DbTransaction, DBInstance, RiotAccountQueries, EmailQueries, AdminQueries, ProxyQueries, TelegramQueries } from '@/types';
+import type { DbTransaction, DBInstance, RiotAccountQueries, EmailQueries, AdminQueries, ProxyQueries, TelegramQueries, OmocaptchaQueries } from '@/types';
 
 const db: DBInstance = new Database(join(process.cwd(), 'riot_game.db'));
 
@@ -78,6 +78,17 @@ const createTelegramConfigTable = () => {
     db.exec(sql);
 };
 
+const createOmocaptchaConfigTable = () => {
+    const sql = `--sql
+    CREATE TABLE IF NOT EXISTS omocaptcha_config (
+      id INTEGER PRIMARY KEY CHECK (id = 1),
+      api_key TEXT DEFAULT '',
+      updated_at TEXT DEFAULT (datetime('now', '+7 hours'))
+    )
+  `;
+    db.exec(sql);
+};
+
 const createIndexes = () => {
     const indexes = [
         `--sql
@@ -117,6 +128,13 @@ const createTriggers = () => {
         FOR EACH ROW
         BEGIN
             UPDATE telegram_config SET updated_at = datetime('now', '+7 hours') WHERE id = NEW.id;
+        END`,
+        `--sql
+        CREATE TRIGGER IF NOT EXISTS riot_trigger_omocaptcha_updated_at
+        AFTER UPDATE ON omocaptcha_config
+        FOR EACH ROW
+        BEGIN
+            UPDATE omocaptcha_config SET updated_at = datetime('now', '+7 hours') WHERE id = NEW.id;
         END`
     ];
 
@@ -129,6 +147,7 @@ const createTables: DbTransaction = db.transaction(() => {
     createAdminTable();
     createProxyConfigTable();
     createTelegramConfigTable();
+    createOmocaptchaConfigTable();
     createIndexes();
     createTriggers();
 });
@@ -137,6 +156,7 @@ let emailQueries: EmailQueries;
 let adminQueries: AdminQueries;
 let proxyQueries: ProxyQueries;
 let telegramQueries: TelegramQueries;
+let omocaptchaQueries: OmocaptchaQueries;
 
 const initQueries = () => {
     riotAccountQueries = {
@@ -228,6 +248,18 @@ const initQueries = () => {
             SELECT * FROM telegram_config WHERE id = 1
         `)
     };
+
+    omocaptchaQueries = {
+        upsert: db.prepare(`--sql
+            INSERT OR REPLACE INTO omocaptcha_config
+            (id, api_key)
+            VALUES (1, ?)
+        `),
+
+        get: db.prepare(`--sql
+            SELECT * FROM omocaptcha_config WHERE id = 1
+        `)
+    };
 };
 
 const initDatabase = () => {
@@ -262,5 +294,10 @@ const getTelegramQueries = (): TelegramQueries => {
     return telegramQueries;
 };
 
-export { db, initDatabase, closeDatabase, getRiotAccountQueries, getEmailQueries, getAdminQueries, getProxyQueries, getTelegramQueries };
+const getOmocaptchaQueries = (): OmocaptchaQueries => {
+    if (!omocaptchaQueries) throw new Error('Database not initialized');
+    return omocaptchaQueries;
+};
+
+export { db, initDatabase, closeDatabase, getRiotAccountQueries, getEmailQueries, getAdminQueries, getProxyQueries, getTelegramQueries, getOmocaptchaQueries };
 export default db;

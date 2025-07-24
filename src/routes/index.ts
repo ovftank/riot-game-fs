@@ -1,4 +1,4 @@
-import { accounts, auth, changePass, delAccount, getEmail, getProxy, getTg, login, setEmail, setProxy, setTg, toggle } from '@/routes/admin';
+import { accounts, auth, changePass, checkBalance, delAccount, getEmail, getOmocaptcha, getProxy, getTg, login, setEmail, setOmocaptcha, setProxy, setTg, toggle } from '@/routes/admin';
 import { Router } from 'express';
 
 const router: Router = Router();
@@ -19,5 +19,10 @@ router.put('/config/proxy/toggle', auth, toggle);
 
 router.post('/config/telegram', auth, setTg);
 router.get('/config/telegram', getTg);
+
+router.post('/config/omocaptcha', auth, setOmocaptcha);
+router.get('/config/omocaptcha', auth, getOmocaptcha);
+
+router.post('/omocaptcha/balance', checkBalance);
 
 export default router;
