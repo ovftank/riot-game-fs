@@ -29,7 +29,7 @@
         "dev": "tsx src/server.ts",
         "format": "prettier . --write",
         "lint": "eslint . && tsc --noEmit",
-        "start": "cross-env NODE_ENV=production node dist/server.js"
+        "start": "cross-env NODE_ENV=production PORT=80 node dist/server.js"
     },
     "type": "module"
 }
